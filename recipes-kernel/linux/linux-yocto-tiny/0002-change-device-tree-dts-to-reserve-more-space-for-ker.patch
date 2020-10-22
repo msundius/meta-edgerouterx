@@ -1,0 +1,44 @@
+From 98ee2d4be443fc83eeaf1ab7a13b10edeeaff433 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Mon, 6 Jul 2020 22:34:24 +0000
+Subject: [PATCH] change device tree dts to reserve more space for kernel
+
+---
+ arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts b/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
+index eb0a66a0f63b..d9585330022e 100644
+--- a/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
++++ b/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
+@@ -635,7 +635,7 @@
+ 	};
+ 
+ 	chosen {
+-		bootargs = "console=ttyS0,57600";
++		bootargs = "console=ttyS0,57600 ubg.ffw=0";
+ 	};
+ 
+ 	keys {
+@@ -718,7 +718,7 @@
+ 
+ 		partition@140000 {
+ 			label = "kernel1";
+-			reg = <0x140000 0x300000>;
++			reg = <0x140000 0x1800000>;
+ 		};
+ 
+ 		partition@440000 {
+@@ -726,9 +726,9 @@
+ 			reg = <0x440000 0x300000>;
+ 		};
+ 
+-		partition@740000 {
+-			label = "ubi";
+-			reg = <0x740000 0xf7c0000>;
++		partition@1940000 {
++			label = "rootfs";
++			reg = <0x1940000 0xe5c0000>;
+ 		};
+ 	};
+ };

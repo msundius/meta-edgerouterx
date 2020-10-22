@@ -1,0 +1,19 @@
+diff --git a/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts b/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
+index d9585330022e..aaecec9475ab 100644
+--- a/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
++++ b/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
+@@ -718,12 +718,12 @@
+ 
+ 		partition@140000 {
+ 			label = "kernel1";
+-			reg = <0x140000 0x1800000>;
++			reg = <0x140000 0x1500000>;
+ 		};
+ 
+ 		partition@440000 {
+ 			label = "kernel2";
+-			reg = <0x440000 0x300000>;
++			reg = <0x1640000 0x300000>;
+ 		};
+ 
+ 		partition@1940000 {

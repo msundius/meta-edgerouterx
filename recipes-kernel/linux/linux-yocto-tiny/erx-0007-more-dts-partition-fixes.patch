@@ -1,0 +1,42 @@
+From 7e5ce036fbc51e8db869a8eca70f729ec730ead2 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Wed, 2 Sep 2020 19:01:18 +0000
+Subject: [PATCH] more-dts-partition-fixes
+
+---
+ arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts b/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
+index aaecec9475ab..35961936e4c2 100644
+--- a/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
++++ b/arch/mips/boot/dts/ralink/edgerouterx-mt7621.dts
+@@ -718,17 +718,21 @@
+ 
+ 		partition@140000 {
+ 			label = "kernel1";
+-			reg = <0x140000 0x1500000>;
++			reg = <0x140000 0x1700000>;
+ 		};
+ 
+-		partition@440000 {
++		partition@1840000 {
+ 			label = "kernel2";
+-			reg = <0x1640000 0x300000>;
++			reg = <0x1840000 0x100000>;
+ 		};
+ 
+ 		partition@1940000 {
+ 			label = "rootfs";
+-			reg = <0x1940000 0xe5c0000>;
++			reg = <0x1940000 0x8F20000>;
++		};
++		partition@A860000 {
++			label = "rwfs";
++			reg = <0xA860000 0x56A0000>;
+ 		};
+ 	};
+ };
+-- 
+2.17.1
+

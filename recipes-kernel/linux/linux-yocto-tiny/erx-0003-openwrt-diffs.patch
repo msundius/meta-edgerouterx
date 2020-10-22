@@ -1,0 +1,5287 @@
+From 2b71f93067ae7690fcbe1d49a2491c6152202d5a Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Tue, 14 Jul 2020 19:26:45 +0000
+Subject: [PATCH] openwrt diffs
+
+these are remaining diffs between linux-yocto-tiny and openwrt kernel.
+just within drivers/mtd. I put them in 1) stuff just openwrt put in
+their kernel 2) I was getting a crash in nand or mtd with both jffs2 and
+ubi. should just pull this and redo it completely if we upgarde kernel
+---
+ drivers/mtd/Kconfig                           |  21 +
+ drivers/mtd/Makefile                          |   5 +
+ drivers/mtd/chips/cfi_cmdset_0002.c           |   3 +-
+ drivers/mtd/devices/block2mtd.c               |  33 +-
+ drivers/mtd/devices/phram.c                   |  15 +-
+ drivers/mtd/lpddr/lpddr_cmds.c                |   1 -
+ drivers/mtd/mtdconcat.c                       |   6 +-
+ drivers/mtd/mtdcore.c                         |  50 +-
+ drivers/mtd/mtdpart.c                         | 242 +++++++-
+ drivers/mtd/mtdsplit/Kconfig                  |  81 +++
+ drivers/mtd/mtdsplit/Makefile                 |  14 +
+ drivers/mtd/mtdsplit/mtdsplit.c               | 130 +++++
+ drivers/mtd/mtdsplit/mtdsplit.h               |  67 +++
+ drivers/mtd/mtdsplit/mtdsplit_bcm_wfi.c       | 523 ++++++++++++++++++
+ drivers/mtd/mtdsplit/mtdsplit_brnimage.c      | 104 ++++
+ drivers/mtd/mtdsplit/mtdsplit_eva.c           | 103 ++++
+ drivers/mtd/mtdsplit/mtdsplit_fit.c           | 147 +++++
+ drivers/mtd/mtdsplit/mtdsplit_jimage.c        | 284 ++++++++++
+ drivers/mtd/mtdsplit/mtdsplit_lzma.c          | 104 ++++
+ drivers/mtd/mtdsplit/mtdsplit_minor.c         | 125 +++++
+ drivers/mtd/mtdsplit/mtdsplit_seama.c         | 118 ++++
+ drivers/mtd/mtdsplit/mtdsplit_squashfs.c      |  72 +++
+ drivers/mtd/mtdsplit/mtdsplit_tplink.c        | 176 ++++++
+ drivers/mtd/mtdsplit/mtdsplit_trx.c           | 155 ++++++
+ drivers/mtd/mtdsplit/mtdsplit_uimage.c        | 478 ++++++++++++++++
+ drivers/mtd/mtdsplit/mtdsplit_wrgg.c          | 142 +++++
+ drivers/mtd/nand/raw/brcmnand/brcmnand.c      |  11 +-
+ drivers/mtd/nand/raw/diskonchip.c             |   7 +-
+ .../mtd/nand/raw/ingenic/ingenic_nand_drv.c   |   2 +-
+ drivers/mtd/nand/raw/mtk_nand.c               |   2 +-
+ drivers/mtd/nand/raw/nand_base.c              |  12 +-
+ drivers/mtd/nand/raw/nand_onfi.c              |   2 +-
+ drivers/mtd/nand/raw/orion_nand.c             |   2 +-
+ drivers/mtd/nand/raw/oxnas_nand.c             |   8 +-
+ drivers/mtd/nand/raw/pasemi_nand.c            |   4 +-
+ drivers/mtd/nand/raw/plat_nand.c              |   2 +-
+ drivers/mtd/nand/raw/sharpsl.c                |   2 +-
+ drivers/mtd/nand/raw/socrates_nand.c          |   2 +-
+ drivers/mtd/nand/raw/sunxi_nand.c             |   2 +-
+ drivers/mtd/nand/raw/tmio_nand.c              |   2 +-
+ drivers/mtd/nand/raw/xway_nand.c              |   2 +-
+ drivers/mtd/nand/spi/core.c                   |   5 +
+ drivers/mtd/parsers/Kconfig                   |  25 +
+ drivers/mtd/parsers/Makefile                  |   2 +
+ drivers/mtd/parsers/bcm47xxpart.c             |  10 +
+ drivers/mtd/parsers/myloader.c                | 181 ++++++
+ drivers/mtd/parsers/parser_trx.c              |  35 +-
+ drivers/mtd/parsers/redboot.c                 |  20 +-
+ drivers/mtd/parsers/routerbootpart.c          | 365 ++++++++++++
+ drivers/mtd/spi-nor/Kconfig                   |  11 +
+ drivers/mtd/spi-nor/spi-nor.c                 | 112 +++-
+ drivers/mtd/ubi/attach.c                      |  25 +-
+ drivers/mtd/ubi/block.c                       |  52 ++
+ drivers/mtd/ubi/build.c                       |  73 +++
+ drivers/mtd/ubi/debug.c                       |  12 +-
+ drivers/mtd/ubi/ubi.h                         |   1 +
+ 56 files changed, 4105 insertions(+), 85 deletions(-)
+ create mode 100644 drivers/mtd/mtdsplit/Kconfig
+ create mode 100644 drivers/mtd/mtdsplit/Makefile
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit.h
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_bcm_wfi.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_brnimage.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_eva.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_fit.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_jimage.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_lzma.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_minor.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_seama.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_squashfs.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_tplink.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_trx.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_uimage.c
+ create mode 100644 drivers/mtd/mtdsplit/mtdsplit_wrgg.c
+ create mode 100644 drivers/mtd/parsers/myloader.c
+ create mode 100644 drivers/mtd/parsers/routerbootpart.c
+
+diff --git a/drivers/mtd/Kconfig b/drivers/mtd/Kconfig
+index 42d401ea60ee..503f19763b14 100644
+--- a/drivers/mtd/Kconfig
++++ b/drivers/mtd/Kconfig
+@@ -12,6 +12,25 @@ menuconfig MTD
+ 
+ if MTD
+ 
++menu "OpenWrt specific MTD options"
++
++config MTD_ROOTFS_ROOT_DEV
++	bool "Automatically set 'rootfs' partition to be root filesystem"
++	default y
++
++config MTD_SPLIT_FIRMWARE
++	bool "Automatically split firmware partition for kernel+rootfs"
++	default y
++
++config MTD_SPLIT_FIRMWARE_NAME
++	string "Firmware partition name"
++	depends on MTD_SPLIT_FIRMWARE
++	default "firmware"
++
++source "drivers/mtd/mtdsplit/Kconfig"
++
++endmenu
++
+ config MTD_TESTS
+ 	tristate "MTD tests support (DANGEROUS)"
+ 	depends on m
+@@ -209,4 +228,6 @@ source "drivers/mtd/ubi/Kconfig"
+ 
+ source "drivers/mtd/hyperbus/Kconfig"
+ 
++source "drivers/mtd/composite/Kconfig"
++
+ endif # MTD
+diff --git a/drivers/mtd/Makefile b/drivers/mtd/Makefile
+index 56cc60ccc477..147e79596a40 100644
+--- a/drivers/mtd/Makefile
++++ b/drivers/mtd/Makefile
+@@ -9,6 +9,8 @@ mtd-y				:= mtdcore.o mtdsuper.o mtdconcat.o mtdpart.o mtdchar.o
+ 
+ obj-y				+= parsers/
+ 
++obj-$(CONFIG_MTD_SPLIT)		+= mtdsplit/
++
+ # 'Users' - code which presents functionality to userspace.
+ obj-$(CONFIG_MTD_BLKDEVS)	+= mtd_blkdevs.o
+ obj-$(CONFIG_MTD_BLOCK)		+= mtdblock.o
+@@ -30,3 +32,6 @@ obj-y		+= chips/ lpddr/ maps/ devices/ nand/ tests/
+ obj-$(CONFIG_MTD_SPI_NOR)	+= spi-nor/
+ obj-$(CONFIG_MTD_UBI)		+= ubi/
+ obj-$(CONFIG_MTD_HYPERBUS)	+= hyperbus/
++
++# Composite drivers must be loaded last
++obj-y				+= composite/
+diff --git a/drivers/mtd/chips/cfi_cmdset_0002.c b/drivers/mtd/chips/cfi_cmdset_0002.c
+index 2aeee7f9f29e..d75377d950cd 100644
+--- a/drivers/mtd/chips/cfi_cmdset_0002.c
++++ b/drivers/mtd/chips/cfi_cmdset_0002.c
+@@ -910,7 +910,7 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
+ 		return 0;
+ 
+ 	case FL_ERASING:
+-		if (!cfip || !(cfip->EraseSuspend & (0x1|0x2)) ||
++		if (1 /* no suspend */ || !cfip || !(cfip->EraseSuspend & (0x1|0x2)) ||
+ 		    !(mode == FL_READY || mode == FL_POINT ||
+ 		    (mode == FL_WRITING && (cfip->EraseSuspend & 0x2))))
+ 			goto sleep;
+@@ -2055,6 +2055,7 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
+ 
+ 	/* Write Buffer Load */
+ 	map_write(map, CMD(0x25), cmd_adr);
++	(void) map_read(map, cmd_adr);
+ 
+ 	chip->state = FL_WRITING_TO_BUFFER;
+ 
+diff --git a/drivers/mtd/devices/block2mtd.c b/drivers/mtd/devices/block2mtd.c
+index 410a321682e6..2427c4acb952 100644
+--- a/drivers/mtd/devices/block2mtd.c
++++ b/drivers/mtd/devices/block2mtd.c
+@@ -26,6 +26,7 @@
+ #include <linux/list.h>
+ #include <linux/init.h>
+ #include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
+ #include <linux/mutex.h>
+ #include <linux/mount.h>
+ #include <linux/slab.h>
+@@ -214,7 +215,7 @@ static void block2mtd_free_device(struct block2mtd_dev *dev)
+ 
+ 
+ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+-		int timeout)
++		const char *mtdname, int timeout)
+ {
+ #ifndef MODULE
+ 	int i;
+@@ -222,6 +223,7 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 	const fmode_t mode = FMODE_READ | FMODE_WRITE | FMODE_EXCL;
+ 	struct block_device *bdev;
+ 	struct block2mtd_dev *dev;
++	struct mtd_partition *part;
+ 	char *name;
+ 
+ 	if (!devname)
+@@ -278,13 +280,16 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 
+ 	/* Setup the MTD structure */
+ 	/* make the name contain the block device in */
+-	name = kasprintf(GFP_KERNEL, "block2mtd: %s", devname);
++	if (!mtdname)
++		mtdname = devname;
++	name = kmalloc(strlen(mtdname) + 1, GFP_KERNEL);
+ 	if (!name)
+ 		goto err_destroy_mutex;
+ 
++	strcpy(name, mtdname);
+ 	dev->mtd.name = name;
+ 
+-	dev->mtd.size = dev->blkdev->bd_inode->i_size & PAGE_MASK;
++	dev->mtd.size = dev->blkdev->bd_inode->i_size & PAGE_MASK & ~(erase_size - 1);
+ 	dev->mtd.erasesize = erase_size;
+ 	dev->mtd.writesize = 1;
+ 	dev->mtd.writebufsize = PAGE_SIZE;
+@@ -297,7 +302,11 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 	dev->mtd.priv = dev;
+ 	dev->mtd.owner = THIS_MODULE;
+ 
+-	if (mtd_device_register(&dev->mtd, NULL, 0)) {
++	part = kzalloc(sizeof(struct mtd_partition), GFP_KERNEL);
++	part->name = name;
++	part->offset = 0;
++	part->size = dev->mtd.size;
++	if (mtd_device_register(&dev->mtd, part, 1)) {
+ 		/* Device didn't get added, so free the entry */
+ 		goto err_destroy_mutex;
+ 	}
+@@ -305,8 +314,7 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 	list_add(&dev->list, &blkmtd_device_list);
+ 	pr_info("mtd%d: [%s] erase_size = %dKiB [%d]\n",
+ 		dev->mtd.index,
+-		dev->mtd.name + strlen("block2mtd: "),
+-		dev->mtd.erasesize >> 10, dev->mtd.erasesize);
++		mtdname, dev->mtd.erasesize >> 10, dev->mtd.erasesize);
+ 	return dev;
+ 
+ err_destroy_mutex:
+@@ -381,7 +389,7 @@ static int block2mtd_setup2(const char *val)
+ 	/* 80 for device, 12 for erase size, 80 for name, 8 for timeout */
+ 	char buf[80 + 12 + 80 + 8];
+ 	char *str = buf;
+-	char *token[2];
++	char *token[4];
+ 	char *name;
+ 	size_t erase_size = PAGE_SIZE;
+ 	unsigned long timeout = MTD_DEFAULT_TIMEOUT;
+@@ -395,7 +403,7 @@ static int block2mtd_setup2(const char *val)
+ 	strcpy(str, val);
+ 	kill_final_newline(str);
+ 
+-	for (i = 0; i < 2; i++)
++	for (i = 0; i < 4; i++)
+ 		token[i] = strsep(&str, ",");
+ 
+ 	if (str) {
+@@ -421,8 +429,13 @@ static int block2mtd_setup2(const char *val)
+ 			return 0;
+ 		}
+ 	}
++	if (token[2] && (strlen(token[2]) + 1 > 80))
++		pr_err("mtd device name too long\n");
+ 
+-	add_device(name, erase_size, timeout);
++	if (token[3] && kstrtoul(token[3], 0, &timeout))
++		pr_err("invalid timeout\n");
++
++	add_device(name, erase_size, token[2], timeout);
+ 
+ 	return 0;
+ }
+@@ -456,7 +469,7 @@ static int block2mtd_setup(const char *val, const struct kernel_param *kp)
+ 
+ 
+ module_param_call(block2mtd, block2mtd_setup, NULL, NULL, 0200);
+-MODULE_PARM_DESC(block2mtd, "Device to use. \"block2mtd=<dev>[,<erasesize>]\"");
++MODULE_PARM_DESC(block2mtd, "Device to use. \"block2mtd=<dev>[,<erasesize>[,<name>[,<timeout>]]]\"");
+ 
+ static int __init block2mtd_init(void)
+ {
+diff --git a/drivers/mtd/devices/phram.c b/drivers/mtd/devices/phram.c
+index 931e5c2481b5..b50ec7ecd10c 100644
+--- a/drivers/mtd/devices/phram.c
++++ b/drivers/mtd/devices/phram.c
+@@ -243,22 +243,25 @@ static int phram_setup(const char *val)
+ 
+ 	ret = parse_num64(&start, token[1]);
+ 	if (ret) {
+-		kfree(name);
+ 		parse_err("illegal start address\n");
++		goto error;
+ 	}
+ 
+ 	ret = parse_num64(&len, token[2]);
+ 	if (ret) {
+-		kfree(name);
+ 		parse_err("illegal device length\n");
++		goto error;
+ 	}
+ 
+ 	ret = register_device(name, start, len);
+-	if (!ret)
+-		pr_info("%s device: %#llx at %#llx\n", name, len, start);
+-	else
+-		kfree(name);
++	if (ret)
++		goto error;
++
++	pr_info("%s device: %#llx at %#llx\n", name, len, start);
++	return 0;
+ 
++error:
++	kfree(name);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/mtd/lpddr/lpddr_cmds.c b/drivers/mtd/lpddr/lpddr_cmds.c
+index 1efc643c9871..9341a8a592e8 100644
+--- a/drivers/mtd/lpddr/lpddr_cmds.c
++++ b/drivers/mtd/lpddr/lpddr_cmds.c
+@@ -68,7 +68,6 @@ struct mtd_info *lpddr_cmdset(struct map_info *map)
+ 	shared = kmalloc_array(lpddr->numchips, sizeof(struct flchip_shared),
+ 						GFP_KERNEL);
+ 	if (!shared) {
+-		kfree(lpddr);
+ 		kfree(mtd);
+ 		return NULL;
+ 	}
+diff --git a/drivers/mtd/mtdconcat.c b/drivers/mtd/mtdconcat.c
+index 170a7221b35f..7b26dba82673 100644
+--- a/drivers/mtd/mtdconcat.c
++++ b/drivers/mtd/mtdconcat.c
+@@ -642,8 +642,12 @@ struct mtd_info *mtd_concat_create(struct mtd_info *subdev[],	/* subdevices to c
+ 		concat->mtd._writev = concat_writev;
+ 	if (subdev[0]->_read_oob)
+ 		concat->mtd._read_oob = concat_read_oob;
++	else
++		concat->mtd._read = concat_read;
+ 	if (subdev[0]->_write_oob)
+ 		concat->mtd._write_oob = concat_write_oob;
++	else
++		concat->mtd._write = concat_write;
+ 	if (subdev[0]->_block_isbad)
+ 		concat->mtd._block_isbad = concat_block_isbad;
+ 	if (subdev[0]->_block_markbad)
+@@ -701,8 +705,6 @@ struct mtd_info *mtd_concat_create(struct mtd_info *subdev[],	/* subdevices to c
+ 	concat->mtd.name = name;
+ 
+ 	concat->mtd._erase = concat_erase;
+-	concat->mtd._read = concat_read;
+-	concat->mtd._write = concat_write;
+ 	concat->mtd._sync = concat_sync;
+ 	concat->mtd._lock = concat_lock;
+ 	concat->mtd._unlock = concat_unlock;
+diff --git a/drivers/mtd/mtdcore.c b/drivers/mtd/mtdcore.c
+index 6cc7ecb0c788..c7c635ac4d1d 100644
+--- a/drivers/mtd/mtdcore.c
++++ b/drivers/mtd/mtdcore.c
+@@ -27,6 +27,7 @@
+ #include <linux/reboot.h>
+ #include <linux/leds.h>
+ #include <linux/debugfs.h>
++#include <linux/root_dev.h>
+ #include <linux/nvmem-provider.h>
+ 
+ #include <linux/mtd/mtd.h>
+@@ -563,7 +564,7 @@ static int mtd_nvmem_add(struct mtd_info *mtd)
+ 
+ 	config.id = -1;
+ 	config.dev = &mtd->dev;
+-	config.name = mtd->name;
++	config.name = dev_name(&mtd->dev);
+ 	config.owner = THIS_MODULE;
+ 	config.reg_read = mtd_nvmem_reg_read;
+ 	config.size = mtd->size;
+@@ -698,6 +699,15 @@ int add_mtd_device(struct mtd_info *mtd)
+ 	   of this try_ nonsense, and no bitching about it
+ 	   either. :) */
+ 	__module_get(THIS_MODULE);
++
++	if (!strcmp(mtd->name, "rootfs") &&
++	    IS_ENABLED(CONFIG_MTD_ROOTFS_ROOT_DEV) &&
++	    ROOT_DEV == 0) {
++		pr_notice("mtd: device %d (%s) set to be root filesystem\n",
++			  mtd->index, mtd->name);
++		ROOT_DEV = MKDEV(MTD_BLOCK_MAJOR, mtd->index);
++	}
++
+ 	return 0;
+ 
+ fail_nvmem_add:
+@@ -1039,6 +1049,44 @@ struct mtd_info *get_mtd_device_nm(const char *name)
+ }
+ EXPORT_SYMBOL_GPL(get_mtd_device_nm);
+ 
++/**
++ *	get_mtd_device_by_node - obtain a validated handle for an MTD device
++ *	by of_node
++ *	@of_node: OF node of MTD device to open
++ *
++ *	This function returns MTD device description structure in case of
++ *	success and an error code in case of failure.
++ */
++struct mtd_info *get_mtd_device_by_node(const struct device_node *of_node)
++{
++	int err = -ENODEV;
++	struct mtd_info *mtd = NULL, *other;
++
++	mutex_lock(&mtd_table_mutex);
++
++	mtd_for_each_device(other) {
++		if (of_node == other->dev.of_node) {
++			mtd = other;
++			break;
++		}
++	}
++
++	if (!mtd)
++		goto out_unlock;
++
++	err = __get_mtd_device(mtd);
++	if (err)
++		goto out_unlock;
++
++	mutex_unlock(&mtd_table_mutex);
++	return mtd;
++
++out_unlock:
++	mutex_unlock(&mtd_table_mutex);
++	return ERR_PTR(err);
++}
++EXPORT_SYMBOL_GPL(get_mtd_device_by_node);
++
+ void put_mtd_device(struct mtd_info *mtd)
+ {
+ 	mutex_lock(&mtd_table_mutex);
+diff --git a/drivers/mtd/mtdpart.c b/drivers/mtd/mtdpart.c
+index 7328c066c5ba..feb32b3a7237 100644
+--- a/drivers/mtd/mtdpart.c
++++ b/drivers/mtd/mtdpart.c
+@@ -15,10 +15,14 @@
+ #include <linux/kmod.h>
+ #include <linux/mtd/mtd.h>
+ #include <linux/mtd/partitions.h>
++#include <linux/magic.h>
+ #include <linux/err.h>
+ #include <linux/of.h>
+ 
+ #include "mtdcore.h"
++#include "mtdsplit/mtdsplit.h"
++
++#define MTD_ERASE_PARTIAL	0x8000 /* partition only covers parts of an erase block */
+ 
+ /* Our partition linked list */
+ static LIST_HEAD(mtd_partitions);
+@@ -38,6 +42,12 @@ struct mtd_part {
+ 	struct list_head list;
+ };
+ 
++static void mtd_partition_split(struct mtd_info *master, struct mtd_part *part);
++static int parse_mtd_partitions_by_type(struct mtd_info *master,
++					enum mtd_parser_type type,
++					const struct mtd_partition **pparts,
++					struct mtd_part_parser_data *data);
++
+ /*
+  * Given a pointer to the MTD object in the mtd_part structure, we can retrieve
+  * the pointer to that structure.
+@@ -198,6 +208,53 @@ static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
+ {
+ 	struct mtd_part *part = mtd_to_part(mtd);
+ 	int ret;
++	size_t wrlen = 0;
++	u8 *erase_buf = NULL;
++	u32 erase_buf_ofs = 0;
++	bool partial_start = false;
++
++	if (mtd->flags & MTD_ERASE_PARTIAL) {
++		size_t readlen = 0;
++		u64 mtd_ofs;
++
++		erase_buf = kmalloc(part->parent->erasesize, GFP_ATOMIC);
++		if (!erase_buf)
++			return -ENOMEM;
++
++		mtd_ofs = part->offset + instr->addr;
++		erase_buf_ofs = do_div(mtd_ofs, part->parent->erasesize);
++
++		if (erase_buf_ofs > 0) {
++			instr->addr -= erase_buf_ofs;
++			ret = mtd_read(part->parent,
++				instr->addr + part->offset,
++				part->parent->erasesize,
++				&readlen, erase_buf);
++
++			instr->len += erase_buf_ofs;
++			partial_start = true;
++		} else {
++			mtd_ofs = part->offset + part->mtd.size;
++			erase_buf_ofs = part->parent->erasesize -
++				do_div(mtd_ofs, part->parent->erasesize);
++
++			if (erase_buf_ofs > 0) {
++				instr->len += erase_buf_ofs;
++				ret = mtd_read(part->parent,
++					part->offset + instr->addr +
++					instr->len - part->parent->erasesize,
++					part->parent->erasesize, &readlen,
++					erase_buf);
++			} else {
++				ret = 0;
++			}
++		}
++		if (ret < 0) {
++			kfree(erase_buf);
++			return ret;
++		}
++
++	}
+ 
+ 	instr->addr += part->offset;
+ 	ret = part->parent->_erase(part->parent, instr);
+@@ -205,6 +262,24 @@ static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
+ 		instr->fail_addr -= part->offset;
+ 	instr->addr -= part->offset;
+ 
++	if (mtd->flags & MTD_ERASE_PARTIAL) {
++		if (partial_start) {
++			part->parent->_write(part->parent,
++				instr->addr, erase_buf_ofs,
++				&wrlen, erase_buf);
++			instr->addr += erase_buf_ofs;
++		} else {
++			instr->len -= erase_buf_ofs;
++			part->parent->_write(part->parent,
++				instr->addr + instr->len,
++				erase_buf_ofs, &wrlen,
++				erase_buf +
++				part->parent->erasesize -
++				erase_buf_ofs);
++		}
++		kfree(erase_buf);
++	}
++
+ 	return ret;
+ }
+ 
+@@ -217,7 +292,16 @@ static int part_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+ static int part_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+ {
+ 	struct mtd_part *part = mtd_to_part(mtd);
+-	return part->parent->_unlock(part->parent, ofs + part->offset, len);
++
++	ofs += part->offset;
++
++	if (mtd->flags & MTD_ERASE_PARTIAL) {
++		/* round up len to next erasesize and round down offset to prev block */
++		len = (mtd_div_by_eb(len, part->parent) + 1) * part->parent->erasesize;
++		ofs &= ~(part->parent->erasesize - 1);
++	}
++
++	return part->parent->_unlock(part->parent, ofs, len);
+ }
+ 
+ static int part_is_locked(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+@@ -517,19 +601,22 @@ static struct mtd_part *allocate_partition(struct mtd_info *parent,
+ 	remainder = do_div(tmp, wr_alignment);
+ 	if ((slave->mtd.flags & MTD_WRITEABLE) && remainder) {
+ 		/* Doesn't start on a boundary of major erase size */
+-		/* FIXME: Let it be writable if it is on a boundary of
+-		 * _minor_ erase size though */
+-		slave->mtd.flags &= ~MTD_WRITEABLE;
+-		printk(KERN_WARNING"mtd: partition \"%s\" doesn't start on an erase/write block boundary -- force read-only\n",
+-			part->name);
++		slave->mtd.flags |= MTD_ERASE_PARTIAL;
++		if (((u32)slave->mtd.size) > parent->erasesize)
++			slave->mtd.flags &= ~MTD_WRITEABLE;
++		else
++			slave->mtd.erasesize = slave->mtd.size;
+ 	}
+ 
+-	tmp = part_absolute_offset(parent) + slave->mtd.size;
++	tmp = part_absolute_offset(parent) + slave->offset + slave->mtd.size;
+ 	remainder = do_div(tmp, wr_alignment);
+ 	if ((slave->mtd.flags & MTD_WRITEABLE) && remainder) {
+-		slave->mtd.flags &= ~MTD_WRITEABLE;
+-		printk(KERN_WARNING"mtd: partition \"%s\" doesn't end on an erase/write block -- force read-only\n",
+-			part->name);
++		slave->mtd.flags |= MTD_ERASE_PARTIAL;
++
++		if ((u32)slave->mtd.size > parent->erasesize)
++			slave->mtd.flags &= ~MTD_WRITEABLE;
++		else
++			slave->mtd.erasesize = slave->mtd.size;
+ 	}
+ 
+ 	mtd_set_ooblayout(&slave->mtd, &part_ooblayout_ops);
+@@ -612,6 +699,7 @@ int mtd_add_partition(struct mtd_info *parent, const char *name,
+ 	if (ret)
+ 		goto err_remove_part;
+ 
++	mtd_partition_split(parent, new);
+ 	mtd_add_partition_attrs(new);
+ 
+ 	return 0;
+@@ -698,6 +786,66 @@ int mtd_del_partition(struct mtd_info *mtd, int partno)
+ }
+ EXPORT_SYMBOL_GPL(mtd_del_partition);
+ 
++static int
++run_parsers_by_type(struct mtd_part *slave, enum mtd_parser_type type)
++{
++	struct mtd_partition *parts;
++	int nr_parts;
++	int i;
++
++	nr_parts = parse_mtd_partitions_by_type(&slave->mtd, type, (const struct mtd_partition **)&parts,
++						NULL);
++	if (nr_parts <= 0)
++		return nr_parts;
++
++	if (WARN_ON(!parts))
++		return 0;
++
++	for (i = 0; i < nr_parts; i++) {
++		/* adjust partition offsets */
++		parts[i].offset += slave->offset;
++
++		mtd_add_partition(slave->parent,
++				  parts[i].name,
++				  parts[i].offset,
++				  parts[i].size);
++	}
++
++	kfree(parts);
++
++	return nr_parts;
++}
++
++#ifdef CONFIG_MTD_SPLIT_FIRMWARE_NAME
++#define SPLIT_FIRMWARE_NAME	CONFIG_MTD_SPLIT_FIRMWARE_NAME
++#else
++#define SPLIT_FIRMWARE_NAME	"unused"
++#endif
++
++static void split_firmware(struct mtd_info *master, struct mtd_part *part)
++{
++	run_parsers_by_type(part, MTD_PARSER_TYPE_FIRMWARE);
++}
++
++static void mtd_partition_split(struct mtd_info *master, struct mtd_part *part)
++{
++	static int rootfs_found = 0;
++
++	if (rootfs_found)
++		return;
++
++	if (!strcmp(part->mtd.name, "rootfs")) {
++		run_parsers_by_type(part, MTD_PARSER_TYPE_ROOTFS);
++
++		rootfs_found = 1;
++	}
++
++	if (IS_ENABLED(CONFIG_MTD_SPLIT_FIRMWARE) &&
++	    !strcmp(part->mtd.name, SPLIT_FIRMWARE_NAME) &&
++	    !of_find_property(mtd_get_of_node(&part->mtd), "compatible", NULL))
++		split_firmware(master, part);
++}
++
+ /*
+  * This function, given a master MTD object and a partition table, creates
+  * and registers slave MTD objects which are bound to the master according to
+@@ -738,6 +886,7 @@ int add_mtd_partitions(struct mtd_info *master,
+ 			goto err_del_partitions;
+ 		}
+ 
++		mtd_partition_split(master, slave);
+ 		mtd_add_partition_attrs(slave);
+ 		/* Look for subpartitions */
+ 		parse_mtd_partitions(&slave->mtd, parts[i].types, NULL);
+@@ -1023,6 +1172,61 @@ void mtd_part_parser_cleanup(struct mtd_partitions *parts)
+ 	}
+ }
+ 
++static struct mtd_part_parser *
++get_partition_parser_by_type(enum mtd_parser_type type,
++			     struct mtd_part_parser *start)
++{
++	struct mtd_part_parser *p, *ret = NULL;
++
++	spin_lock(&part_parser_lock);
++
++	p = list_prepare_entry(start, &part_parsers, list);
++	if (start)
++		mtd_part_parser_put(start);
++
++	list_for_each_entry_continue(p, &part_parsers, list) {
++		if (p->type == type && try_module_get(p->owner)) {
++			ret = p;
++			break;
++		}
++	}
++
++	spin_unlock(&part_parser_lock);
++
++	return ret;
++}
++
++static int parse_mtd_partitions_by_type(struct mtd_info *master,
++					enum mtd_parser_type type,
++					const struct mtd_partition **pparts,
++					struct mtd_part_parser_data *data)
++{
++	struct mtd_part_parser *prev = NULL;
++	int ret = 0;
++
++	while (1) {
++		struct mtd_part_parser *parser;
++
++		parser = get_partition_parser_by_type(type, prev);
++		if (!parser)
++			break;
++
++		ret = (*parser->parse_fn)(master, pparts, data);
++
++		if (ret > 0) {
++			mtd_part_parser_put(parser);
++			printk(KERN_NOTICE
++			       "%d %s partitions found on MTD device %s\n",
++			       ret, parser->name, master->name);
++			break;
++		}
++
++		prev = parser;
++	}
++
++	return ret;
++}
++
+ int mtd_is_partition(const struct mtd_info *mtd)
+ {
+ 	struct mtd_part *part;
+@@ -1040,6 +1244,24 @@ int mtd_is_partition(const struct mtd_info *mtd)
+ }
+ EXPORT_SYMBOL_GPL(mtd_is_partition);
+ 
++struct mtd_info *mtdpart_get_master(const struct mtd_info *mtd)
++{
++	if (!mtd_is_partition(mtd))
++		return (struct mtd_info *)mtd;
++
++	return mtd_to_part(mtd)->parent;
++}
++EXPORT_SYMBOL_GPL(mtdpart_get_master);
++
++uint64_t mtdpart_get_offset(const struct mtd_info *mtd)
++{
++	if (!mtd_is_partition(mtd))
++		return 0;
++
++	return mtd_to_part(mtd)->offset;
++}
++EXPORT_SYMBOL_GPL(mtdpart_get_offset);
++
+ /* Returns the size of the entire flash chip */
+ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
+ {
+diff --git a/drivers/mtd/mtdsplit/Kconfig b/drivers/mtd/mtdsplit/Kconfig
+new file mode 100644
+index 000000000000..0447df585c8d
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/Kconfig
+@@ -0,0 +1,81 @@
++config MTD_SPLIT
++	def_bool n
++	help
++	  Generic MTD split support.
++
++config MTD_SPLIT_SUPPORT
++	def_bool MTD = y
++
++comment "Rootfs partition parsers"
++
++config MTD_SPLIT_SQUASHFS_ROOT
++	bool "Squashfs based root partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++	default n
++	help
++	  This provides a parsing function which allows to detect the
++	  offset and size of the unused portion of a rootfs partition
++	  containing a squashfs.
++
++comment "Firmware partition parsers"
++
++config MTD_SPLIT_BCM_WFI_FW
++	bool "Broadcom Whole Flash Image parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_SEAMA_FW
++	bool "Seama firmware parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_WRGG_FW
++	bool "WRGG firmware parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_UIMAGE_FW
++	bool "uImage based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_FIT_FW
++	bool "FIT based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_LZMA_FW
++	bool "LZMA compressed kernel based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_TPLINK_FW
++	bool "TP-Link firmware parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_TRX_FW
++	bool "TRX image based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_BRNIMAGE_FW
++	bool "brnImage (brnboot image) firmware parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_EVA_FW
++	bool "EVA image based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_MINOR_FW
++	bool "Mikrotik NOR image based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
++
++config MTD_SPLIT_JIMAGE_FW
++	bool "JBOOT Image based firmware partition parser"
++	depends on MTD_SPLIT_SUPPORT
++	select MTD_SPLIT
+diff --git a/drivers/mtd/mtdsplit/Makefile b/drivers/mtd/mtdsplit/Makefile
+new file mode 100644
+index 000000000000..d3634e78db0a
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/Makefile
+@@ -0,0 +1,14 @@
++obj-$(CONFIG_MTD_SPLIT)		+= mtdsplit.o
++obj-$(CONFIG_MTD_SPLIT_BCM_WFI_FW) += mtdsplit_bcm_wfi.o
++obj-$(CONFIG_MTD_SPLIT_SEAMA_FW) += mtdsplit_seama.o
++obj-$(CONFIG_MTD_SPLIT_SQUASHFS_ROOT) += mtdsplit_squashfs.o
++obj-$(CONFIG_MTD_SPLIT_UIMAGE_FW) += mtdsplit_uimage.o
++obj-$(CONFIG_MTD_SPLIT_FIT_FW) += mtdsplit_fit.o
++obj-$(CONFIG_MTD_SPLIT_LZMA_FW) += mtdsplit_lzma.o
++obj-$(CONFIG_MTD_SPLIT_TPLINK_FW) += mtdsplit_tplink.o
++obj-$(CONFIG_MTD_SPLIT_TRX_FW) += mtdsplit_trx.o
++obj-$(CONFIG_MTD_SPLIT_BRNIMAGE_FW) += mtdsplit_brnimage.o
++obj-$(CONFIG_MTD_SPLIT_EVA_FW) += mtdsplit_eva.o
++obj-$(CONFIG_MTD_SPLIT_WRGG_FW) += mtdsplit_wrgg.o
++obj-$(CONFIG_MTD_SPLIT_MINOR_FW) += mtdsplit_minor.o
++obj-$(CONFIG_MTD_SPLIT_JIMAGE_FW) += mtdsplit_jimage.o
+diff --git a/drivers/mtd/mtdsplit/mtdsplit.c b/drivers/mtd/mtdsplit/mtdsplit.c
+new file mode 100644
+index 000000000000..b2e51dcfc66b
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit.c
+@@ -0,0 +1,130 @@
++/*
++ * Copyright (C) 2009-2013 Felix Fietkau <nbd@nbd.name>
++ * Copyright (C) 2009-2013 Gabor Juhos <juhosg@openwrt.org>
++ * Copyright (C) 2012 Jonas Gorski <jogo@openwrt.org>
++ * Copyright (C) 2013 Hauke Mehrtens <hauke@hauke-m.de>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published
++ * by the Free Software Foundation.
++ *
++ */
++
++#define pr_fmt(fmt)	"mtdsplit: " fmt
++
++#include <linux/export.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/magic.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++
++#include "mtdsplit.h"
++
++#define UBI_EC_MAGIC			0x55424923	/* UBI# */
++
++struct squashfs_super_block {
++	__le32 s_magic;
++	__le32 pad0[9];
++	__le64 bytes_used;
++};
++
++int mtd_get_squashfs_len(struct mtd_info *master,
++			 size_t offset,
++			 size_t *squashfs_len)
++{
++	struct squashfs_super_block sb;
++	size_t retlen;
++	int err;
++
++	err = mtd_read(master, offset, sizeof(sb), &retlen, (void *)&sb);
++	if (err || (retlen != sizeof(sb))) {
++		pr_alert("error occured while reading from \"%s\"\n",
++			 master->name);
++		return -EIO;
++	}
++
++	if (le32_to_cpu(sb.s_magic) != SQUASHFS_MAGIC) {
++		pr_alert("no squashfs found in \"%s\"\n", master->name);
++		return -EINVAL;
++	}
++
++	retlen = le64_to_cpu(sb.bytes_used);
++	if (retlen <= 0) {
++		pr_alert("squashfs is empty in \"%s\"\n", master->name);
++		return -ENODEV;
++	}
++
++	if (offset + retlen > master->size) {
++		pr_alert("squashfs has invalid size in \"%s\"\n",
++			 master->name);
++		return -EINVAL;
++	}
++
++	*squashfs_len = retlen;
++	return 0;
++}
++EXPORT_SYMBOL_GPL(mtd_get_squashfs_len);
++
++static ssize_t mtd_next_eb(struct mtd_info *mtd, size_t offset)
++{
++	return mtd_rounddown_to_eb(offset, mtd) + mtd->erasesize;
++}
++
++int mtd_check_rootfs_magic(struct mtd_info *mtd, size_t offset,
++			   enum mtdsplit_part_type *type)
++{
++	u32 magic;
++	size_t retlen;
++	int ret;
++
++	ret = mtd_read(mtd, offset, sizeof(magic), &retlen,
++		       (unsigned char *) &magic);
++	if (ret)
++		return ret;
++
++	if (retlen != sizeof(magic))
++		return -EIO;
++
++	if (le32_to_cpu(magic) == SQUASHFS_MAGIC) {
++		if (type)
++			*type = MTDSPLIT_PART_TYPE_SQUASHFS;
++		return 0;
++	} else if (magic == 0x19852003) {
++		if (type)
++			*type = MTDSPLIT_PART_TYPE_JFFS2;
++		return 0;
++	} else if (be32_to_cpu(magic) == UBI_EC_MAGIC) {
++		if (type)
++			*type = MTDSPLIT_PART_TYPE_UBI;
++		return 0;
++	}
++
++	return -EINVAL;
++}
++EXPORT_SYMBOL_GPL(mtd_check_rootfs_magic);
++
++int mtd_find_rootfs_from(struct mtd_info *mtd,
++			 size_t from,
++			 size_t limit,
++			 size_t *ret_offset,
++			 enum mtdsplit_part_type *type)
++{
++	size_t offset;
++	int err;
++
++	for (offset = from; offset < limit;
++	     offset = mtd_next_eb(mtd, offset)) {
++		err = mtd_check_rootfs_magic(mtd, offset, type);
++		if (err)
++			continue;
++
++		*ret_offset = offset;
++		return 0;
++	}
++
++	return -ENODEV;
++}
++EXPORT_SYMBOL_GPL(mtd_find_rootfs_from);
++
+diff --git a/drivers/mtd/mtdsplit/mtdsplit.h b/drivers/mtd/mtdsplit/mtdsplit.h
+new file mode 100644
+index 000000000000..71d62a8956b2
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit.h
+@@ -0,0 +1,67 @@
++/*
++ * Copyright (C) 2009-2013 Felix Fietkau <nbd@nbd.name>
++ * Copyright (C) 2009-2013 Gabor Juhos <juhosg@openwrt.org>
++ * Copyright (C) 2012 Jonas Gorski <jogo@openwrt.org>
++ * Copyright (C) 2013 Hauke Mehrtens <hauke@hauke-m.de>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published
++ * by the Free Software Foundation.
++ *
++ */
++
++#ifndef _MTDSPLIT_H
++#define _MTDSPLIT_H
++
++#define KERNEL_PART_NAME	"kernel"
++#define ROOTFS_PART_NAME	"rootfs"
++#define UBI_PART_NAME		"ubi"
++
++#define ROOTFS_SPLIT_NAME	"rootfs_data"
++
++enum mtdsplit_part_type {
++	MTDSPLIT_PART_TYPE_UNK = 0,
++	MTDSPLIT_PART_TYPE_SQUASHFS,
++	MTDSPLIT_PART_TYPE_JFFS2,
++	MTDSPLIT_PART_TYPE_UBI,
++};
++
++#ifdef CONFIG_MTD_SPLIT
++int mtd_get_squashfs_len(struct mtd_info *master,
++			 size_t offset,
++			 size_t *squashfs_len);
++
++int mtd_check_rootfs_magic(struct mtd_info *mtd, size_t offset,
++			   enum mtdsplit_part_type *type);
++
++int mtd_find_rootfs_from(struct mtd_info *mtd,
++			 size_t from,
++			 size_t limit,
++			 size_t *ret_offset,
++			 enum mtdsplit_part_type *type);
++
++#else
++static inline int mtd_get_squashfs_len(struct mtd_info *master,
++				       size_t offset,
++				       size_t *squashfs_len)
++{
++	return -ENODEV;
++}
++
++static inline int mtd_check_rootfs_magic(struct mtd_info *mtd, size_t offset,
++					 enum mtdsplit_part_type *type)
++{
++	return -EINVAL;
++}
++
++static inline int mtd_find_rootfs_from(struct mtd_info *mtd,
++				       size_t from,
++				       size_t limit,
++				       size_t *ret_offset,
++				       enum mtdsplit_part_type *type)
++{
++	return -ENODEV;
++}
++#endif /* CONFIG_MTD_SPLIT */
++
++#endif /* _MTDSPLIT_H */
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_bcm_wfi.c b/drivers/mtd/mtdsplit/mtdsplit_bcm_wfi.c
+new file mode 100644
+index 000000000000..1ddcf6745fac
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_bcm_wfi.c
+@@ -0,0 +1,523 @@
++/*
++ * MTD split for Broadcom Whole Flash Image
++ *
++ * Copyright (C) 2020 Álvaro Fernández Rojas <noltari@gmail.com>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published
++ * by the Free Software Foundation.
++ *
++ */
++
++#define je16_to_cpu(x) ((x).v16)
++#define je32_to_cpu(x) ((x).v32)
++
++#include <linux/crc32.h>
++#include <linux/init.h>
++#include <linux/jffs2.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/slab.h>
++#include <linux/byteorder/generic.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++
++#include "mtdsplit.h"
++
++#define char_to_num(c)		((c >= '0' && c <= '9') ? (c - '0') : (0))
++
++#define BCM_WFI_PARTS		3
++#define BCM_WFI_SPLIT_PARTS	2
++
++#define CFERAM_NAME		"cferam"
++#define CFERAM_NAME_LEN		(sizeof(CFERAM_NAME) - 1)
++#define KERNEL_NAME		"vmlinux.lz"
++#define KERNEL_NAME_LEN		(sizeof(KERNEL_NAME) - 1)
++#define OPENWRT_NAME		"1-openwrt"
++#define OPENWRT_NAME_LEN	(sizeof(OPENWRT_NAME) - 1)
++
++#define UBI_MAGIC		0x55424923
++
++#define CFE_MAGIC_PFX		"cferam."
++#define CFE_MAGIC_PFX_LEN	(sizeof(CFE_MAGIC_PFX) - 1)
++#define CFE_MAGIC		"cferam.000"
++#define CFE_MAGIC_LEN		(sizeof(CFE_MAGIC) - 1)
++#define SERCOMM_MAGIC_PFX	"eRcOmM."
++#define SERCOMM_MAGIC_PFX_LEN	(sizeof(SERCOMM_MAGIC_PFX) - 1)
++#define SERCOMM_MAGIC		"eRcOmM.000"
++#define SERCOMM_MAGIC_LEN	(sizeof(SERCOMM_MAGIC) - 1)
++
++#define PART_CFERAM		"cferam"
++#define PART_FIRMWARE		"firmware"
++#define PART_IMAGE_1		"img1"
++#define PART_IMAGE_2		"img2"
++
++static u32 jffs2_dirent_crc(struct jffs2_raw_dirent *node)
++{
++	return crc32(0, node, sizeof(struct jffs2_raw_dirent) - 8);
++}
++
++static bool jffs2_dirent_valid(struct jffs2_raw_dirent *node)
++{
++	return ((je16_to_cpu(node->magic) == JFFS2_MAGIC_BITMASK) &&
++		(je16_to_cpu(node->nodetype) == JFFS2_NODETYPE_DIRENT) &&
++		je32_to_cpu(node->ino) &&
++		je32_to_cpu(node->node_crc) == jffs2_dirent_crc(node));
++}
++
++static int jffs2_find_file(struct mtd_info *mtd, uint8_t *buf,
++			   const char *name, size_t name_len,
++			   loff_t *offs, loff_t size,
++			   char **out_name, size_t *out_name_len)
++{
++	const loff_t end = *offs + size;
++	struct jffs2_raw_dirent *node;
++	bool valid = false;
++	size_t retlen;
++	uint16_t magic;
++	int rc;
++
++	for (; *offs < end; *offs += mtd->erasesize) {
++		unsigned int block_offs = 0;
++
++		/* Skip CFE erased blocks */
++		rc = mtd_read(mtd, *offs, sizeof(magic), &retlen,
++			      (void *) &magic);
++		if (rc || retlen != sizeof(magic)) {
++			continue;
++		}
++
++		/* Skip blocks not starting with JFFS2 magic */
++		if (magic != JFFS2_MAGIC_BITMASK)
++			continue;
++
++		/* Read full block */
++		rc = mtd_read(mtd, *offs, mtd->erasesize, &retlen,
++			      (void *) buf);
++		if (rc)
++			return rc;
++		if (retlen != mtd->erasesize)
++			return -EINVAL;
++
++		while (block_offs < mtd->erasesize) {
++			node = (struct jffs2_raw_dirent *) &buf[block_offs];
++
++			if (!jffs2_dirent_valid(node)) {
++				block_offs += 4;
++				continue;
++			}
++
++			if (!memcmp(node->name, OPENWRT_NAME,
++				    OPENWRT_NAME_LEN)) {
++				valid = true;
++			} else if (!memcmp(node->name, name, name_len)) {
++				if (!valid)
++					return -EINVAL;
++
++				if (out_name)
++					*out_name = kstrndup(node->name,
++							     node->nsize,
++							     GFP_KERNEL);
++
++				if (out_name_len)
++					*out_name_len = node->nsize;
++
++				return 0;
++			}
++
++			block_offs += je32_to_cpu(node->totlen);
++			block_offs = (block_offs + 0x3) & ~0x3;
++		}
++	}
++
++	return -ENOENT;
++}
++
++static int ubifs_find(struct mtd_info *mtd, loff_t *offs, loff_t size)
++{
++	const loff_t end = *offs + size;
++	uint32_t magic;
++	size_t retlen;
++	int rc;
++
++	for (; *offs < end; *offs += mtd->erasesize) {
++		rc = mtd_read(mtd, *offs, sizeof(magic), &retlen,
++			      (unsigned char *) &magic);
++		if (rc || retlen != sizeof(magic))
++			continue;
++
++		if (be32_to_cpu(magic) == UBI_MAGIC)
++			return 0;
++	}
++
++	return -ENOENT;
++}
++
++static int parse_bcm_wfi(struct mtd_info *master,
++			 const struct mtd_partition **pparts,
++			 uint8_t *buf, loff_t off, loff_t size, bool cfe_part)
++{
++	struct mtd_partition *parts;
++	loff_t cfe_off, kernel_off, rootfs_off;
++	unsigned int num_parts = BCM_WFI_PARTS, cur_part = 0;
++	int ret;
++
++	if (cfe_part) {
++		num_parts++;
++		cfe_off = off;
++
++		ret = jffs2_find_file(master, buf, CFERAM_NAME,
++				      CFERAM_NAME_LEN, &cfe_off,
++				      size - (cfe_off - off), NULL, NULL);
++		if (ret)
++			return ret;
++
++		kernel_off = cfe_off + master->erasesize;
++	} else {
++		kernel_off = off;
++	}
++
++	ret = jffs2_find_file(master, buf, KERNEL_NAME, KERNEL_NAME_LEN,
++			      &kernel_off, size - (kernel_off - off),
++			      NULL, NULL);
++	if (ret)
++		return ret;
++
++	rootfs_off = kernel_off + master->erasesize;
++	ret = ubifs_find(master, &rootfs_off, size - (rootfs_off - off));
++	if (ret)
++		return ret;
++
++	parts = kzalloc(num_parts * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	if (cfe_part) {
++		parts[cur_part].name = PART_CFERAM;
++		parts[cur_part].mask_flags = MTD_WRITEABLE;
++		parts[cur_part].offset = cfe_off;
++		parts[cur_part].size = kernel_off - cfe_off;
++		cur_part++;
++	}
++
++	parts[cur_part].name = PART_FIRMWARE;
++	parts[cur_part].offset = kernel_off;
++	parts[cur_part].size = size - (kernel_off - off);
++	cur_part++;
++
++	parts[cur_part].name = KERNEL_PART_NAME;
++	parts[cur_part].offset = kernel_off;
++	parts[cur_part].size = rootfs_off - kernel_off;
++	cur_part++;
++
++	parts[cur_part].name = UBI_PART_NAME;
++	parts[cur_part].offset = rootfs_off;
++	parts[cur_part].size = size - (rootfs_off - off);
++	cur_part++;
++
++	*pparts = parts;
++
++	return num_parts;
++}
++
++static int mtdsplit_parse_bcm_wfi(struct mtd_info *master,
++				  const struct mtd_partition **pparts,
++				  struct mtd_part_parser_data *data)
++{
++	struct device_node *mtd_node;
++	bool cfe_part = true;
++	uint8_t *buf;
++	int ret;
++
++	mtd_node = mtd_get_of_node(master);
++	if (!mtd_node)
++		return -EINVAL;
++
++	buf = kzalloc(master->erasesize, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	if (of_property_read_bool(mtd_node, "brcm,no-cferam"))
++		cfe_part = false;
++
++	ret = parse_bcm_wfi(master, pparts, buf, 0, master->size, cfe_part);
++
++	kfree(buf);
++
++	return ret;
++}
++
++static const struct of_device_id mtdsplit_bcm_wfi_of_match[] = {
++	{ .compatible = "brcm,wfi" },
++	{ },
++};
++
++static struct mtd_part_parser mtdsplit_bcm_wfi_parser = {
++	.owner = THIS_MODULE,
++	.name = "bcm-wfi-fw",
++	.of_match_table = mtdsplit_bcm_wfi_of_match,
++	.parse_fn = mtdsplit_parse_bcm_wfi,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int cferam_bootflag_value(const char *name, size_t name_len)
++{
++	int rc = -ENOENT;
++
++	if (name &&
++	    (name_len >= CFE_MAGIC_LEN) &&
++	    !memcmp(name, CFE_MAGIC_PFX, CFE_MAGIC_PFX_LEN)) {
++		rc = char_to_num(name[CFE_MAGIC_PFX_LEN + 0]) * 100;
++		rc += char_to_num(name[CFE_MAGIC_PFX_LEN + 1]) * 10;
++		rc += char_to_num(name[CFE_MAGIC_PFX_LEN + 2]) * 1;
++	}
++
++	return rc;
++}
++
++static int mtdsplit_parse_bcm_wfi_split(struct mtd_info *master,
++					const struct mtd_partition **pparts,
++					struct mtd_part_parser_data *data)
++{
++	struct mtd_partition *parts;
++	loff_t cfe_off;
++	loff_t img1_off = 0;
++	loff_t img2_off = master->size / 2;
++	loff_t img1_size = (img2_off - img1_off);
++	loff_t img2_size = (master->size - img2_off);
++	loff_t active_off, inactive_off;
++	loff_t active_size, inactive_size;
++	const char *inactive_name;
++	uint8_t *buf;
++	char *cfe1_name = NULL, *cfe2_name = NULL;
++	size_t cfe1_size = 0, cfe2_size = 0;
++	int ret;
++	int bf1, bf2;
++
++	buf = kzalloc(master->erasesize, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	cfe_off = img1_off;
++	ret = jffs2_find_file(master, buf, CFERAM_NAME, CFERAM_NAME_LEN,
++			      &cfe_off, img1_size, &cfe1_name, &cfe1_size);
++
++	cfe_off = img2_off;
++	ret = jffs2_find_file(master, buf, CFERAM_NAME, CFERAM_NAME_LEN,
++			      &cfe_off, img2_size, &cfe2_name, &cfe2_size);
++
++	bf1 = cferam_bootflag_value(cfe1_name, cfe1_size);
++	if (bf1 >= 0)
++		printk("cferam: bootflag1=%d\n", bf1);
++
++	bf2 = cferam_bootflag_value(cfe2_name, cfe2_size);
++	if (bf2 >= 0)
++		printk("cferam: bootflag2=%d\n", bf2);
++
++	kfree(cfe1_name);
++	kfree(cfe2_name);
++
++	if (bf1 >= bf2) {
++		active_off = img1_off;
++		active_size = img1_size;
++		inactive_off = img2_off;
++		inactive_size = img2_size;
++		inactive_name = PART_IMAGE_2;
++	} else {
++		active_off = img2_off;
++		active_size = img2_size;
++		inactive_off = img1_off;
++		inactive_size = img1_size;
++		inactive_name = PART_IMAGE_1;
++	}
++
++	ret = parse_bcm_wfi(master, pparts, buf, active_off, active_size, true);
++
++	kfree(buf);
++
++	if (ret > 0) {
++		parts = kzalloc((ret + 1) * sizeof(*parts), GFP_KERNEL);
++		if (!parts)
++			return -ENOMEM;
++
++		memcpy(parts, *pparts, ret * sizeof(*parts));
++		kfree(*pparts);
++
++		parts[ret].name = inactive_name;
++		parts[ret].offset = inactive_off;
++		parts[ret].size = inactive_size;
++		ret++;
++
++		*pparts = parts;
++	} else {
++		parts = kzalloc(BCM_WFI_SPLIT_PARTS * sizeof(*parts), GFP_KERNEL);
++
++		parts[0].name = PART_IMAGE_1;
++		parts[0].offset = img1_off;
++		parts[0].size = img1_size;
++
++		parts[1].name = PART_IMAGE_2;
++		parts[1].offset = img2_off;
++		parts[1].size = img2_size;
++
++		*pparts = parts;
++	}
++
++	return ret;
++}
++
++static const struct of_device_id mtdsplit_bcm_wfi_split_of_match[] = {
++	{ .compatible = "brcm,wfi-split" },
++	{ },
++};
++
++static struct mtd_part_parser mtdsplit_bcm_wfi_split_parser = {
++	.owner = THIS_MODULE,
++	.name = "bcm-wfi-split-fw",
++	.of_match_table = mtdsplit_bcm_wfi_split_of_match,
++	.parse_fn = mtdsplit_parse_bcm_wfi_split,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int sercomm_bootflag_value(struct mtd_info *mtd, uint8_t *buf)
++{
++	size_t retlen;
++	loff_t offs;
++	int rc;
++
++	for (offs = 0; offs < mtd->size; offs += mtd->erasesize) {
++		rc = mtd_read(mtd, offs, SERCOMM_MAGIC_LEN, &retlen, buf);
++		if (rc || retlen != SERCOMM_MAGIC_LEN)
++			continue;
++
++		if (memcmp(buf, SERCOMM_MAGIC_PFX, SERCOMM_MAGIC_PFX_LEN))
++			continue;
++
++		rc = char_to_num(buf[SERCOMM_MAGIC_PFX_LEN + 0]) * 100;
++		rc += char_to_num(buf[SERCOMM_MAGIC_PFX_LEN + 1]) * 10;
++		rc += char_to_num(buf[SERCOMM_MAGIC_PFX_LEN + 2]) * 1;
++
++		return rc;
++	}
++
++	return -ENOENT;
++}
++
++static int mtdsplit_parse_ser_wfi(struct mtd_info *master,
++				  const struct mtd_partition **pparts,
++				  struct mtd_part_parser_data *data)
++{
++	struct mtd_partition *parts;
++	struct mtd_info *mtd_bf1, *mtd_bf2;
++	loff_t img1_off = 0;
++	loff_t img2_off = master->size / 2;
++	loff_t img1_size = (img2_off - img1_off);
++	loff_t img2_size = (master->size - img2_off);
++	loff_t active_off, inactive_off;
++	loff_t active_size, inactive_size;
++	const char *inactive_name;
++	uint8_t *buf;
++	int bf1, bf2;
++	int ret;
++
++	mtd_bf1 = get_mtd_device_nm("bootflag1");
++	if (IS_ERR(mtd_bf1))
++		return -ENOENT;
++
++	mtd_bf2 = get_mtd_device_nm("bootflag2");
++	if (IS_ERR(mtd_bf2))
++		return -ENOENT;
++
++	buf = kzalloc(master->erasesize, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	bf1 = sercomm_bootflag_value(mtd_bf1, buf);
++	if (bf1 >= 0)
++		printk("sercomm: bootflag1=%d\n", bf1);
++
++	bf2 = sercomm_bootflag_value(mtd_bf2, buf);
++	if (bf2 >= 0)
++		printk("sercomm: bootflag2=%d\n", bf2);
++
++	if (bf1 == bf2 && bf2 >= 0) {
++		struct erase_info bf_erase;
++
++		bf2 = -ENOENT;
++		bf_erase.addr = 0;
++		bf_erase.len = mtd_bf2->size;
++		mtd_erase(mtd_bf2, &bf_erase);
++	}
++
++	if (bf1 >= bf2) {
++		active_off = img1_off;
++		active_size = img1_size;
++		inactive_off = img2_off;
++		inactive_size = img2_size;
++		inactive_name = PART_IMAGE_2;
++	} else {
++		active_off = img2_off;
++		active_size = img2_size;
++		inactive_off = img1_off;
++		inactive_size = img1_size;
++		inactive_name = PART_IMAGE_1;
++	}
++
++	ret = parse_bcm_wfi(master, pparts, buf, active_off, active_size, false);
++
++	kfree(buf);
++
++	if (ret > 0) {
++		parts = kzalloc((ret + 1) * sizeof(*parts), GFP_KERNEL);
++		if (!parts)
++			return -ENOMEM;
++
++		memcpy(parts, *pparts, ret * sizeof(*parts));
++		kfree(*pparts);
++
++		parts[ret].name = inactive_name;
++		parts[ret].offset = inactive_off;
++		parts[ret].size = inactive_size;
++		ret++;
++
++		*pparts = parts;
++	} else {
++		parts = kzalloc(BCM_WFI_SPLIT_PARTS * sizeof(*parts), GFP_KERNEL);
++
++		parts[0].name = PART_IMAGE_1;
++		parts[0].offset = img1_off;
++		parts[0].size = img1_size;
++
++		parts[1].name = PART_IMAGE_2;
++		parts[1].offset = img2_off;
++		parts[1].size = img2_size;
++
++		*pparts = parts;
++	}
++
++	return ret;
++}
++
++static const struct of_device_id mtdsplit_ser_wfi_of_match[] = {
++	{ .compatible = "sercomm,wfi" },
++	{ },
++};
++
++static struct mtd_part_parser mtdsplit_ser_wfi_parser = {
++	.owner = THIS_MODULE,
++	.name = "ser-wfi-fw",
++	.of_match_table = mtdsplit_ser_wfi_of_match,
++	.parse_fn = mtdsplit_parse_ser_wfi,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_bcm_wfi_init(void)
++{
++	register_mtd_parser(&mtdsplit_bcm_wfi_parser);
++	register_mtd_parser(&mtdsplit_bcm_wfi_split_parser);
++	register_mtd_parser(&mtdsplit_ser_wfi_parser);
++
++	return 0;
++}
++
++module_init(mtdsplit_bcm_wfi_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_brnimage.c b/drivers/mtd/mtdsplit/mtdsplit_brnimage.c
+new file mode 100644
+index 000000000000..3f2d79601a14
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_brnimage.c
+@@ -0,0 +1,104 @@
++/*
++ *  Copyright (C) 2012 John Crispin <blogic@openwrt.org>
++ *  Copyright (C) 2015 Martin Blumenstingl <martin.blumenstingl@googlemail.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++
++#include "mtdsplit.h"
++
++#define BRNIMAGE_NR_PARTS	2
++
++#define BRNIMAGE_ALIGN_BYTES	0x400
++#define BRNIMAGE_FOOTER_SIZE	12
++
++#define BRNIMAGE_MIN_OVERHEAD	(BRNIMAGE_FOOTER_SIZE)
++#define BRNIMAGE_MAX_OVERHEAD	(BRNIMAGE_ALIGN_BYTES + BRNIMAGE_FOOTER_SIZE)
++
++static int mtdsplit_parse_brnimage(struct mtd_info *master,
++				const struct mtd_partition **pparts,
++				struct mtd_part_parser_data *data)
++{
++	struct mtd_partition *parts;
++	uint32_t buf;
++	unsigned long rootfs_offset, rootfs_size, kernel_size;
++	size_t len;
++	int ret = 0;
++
++	for (rootfs_offset = 0; rootfs_offset < master->size;
++	     rootfs_offset += BRNIMAGE_ALIGN_BYTES) {
++		ret = mtd_check_rootfs_magic(master, rootfs_offset, NULL);
++		if (!ret)
++			break;
++	}
++
++	if (ret)
++		return ret;
++
++	if (rootfs_offset >= master->size)
++		return -EINVAL;
++
++	ret = mtd_read(master, rootfs_offset - BRNIMAGE_FOOTER_SIZE, 4, &len,
++			(void *)&buf);
++	if (ret)
++		return ret;
++
++	if (len != 4)
++		return -EIO;
++
++	kernel_size = le32_to_cpu(buf);
++
++	if (kernel_size > (rootfs_offset - BRNIMAGE_MIN_OVERHEAD))
++		return -EINVAL;
++
++	if (kernel_size < (rootfs_offset - BRNIMAGE_MAX_OVERHEAD))
++		return -EINVAL;
++
++	/*
++	 * The footer must be untouched as it contains the checksum of the
++	 * original brnImage (kernel + squashfs)!
++	 */
++	rootfs_size = master->size - rootfs_offset - BRNIMAGE_FOOTER_SIZE;
++
++	parts = kzalloc(BRNIMAGE_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = 0;
++	parts[0].size = kernel_size;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = rootfs_size;
++
++	*pparts = parts;
++	return BRNIMAGE_NR_PARTS;
++}
++
++static struct mtd_part_parser mtdsplit_brnimage_parser = {
++	.owner = THIS_MODULE,
++	.name = "brnimage-fw",
++	.parse_fn = mtdsplit_parse_brnimage,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_brnimage_init(void)
++{
++	register_mtd_parser(&mtdsplit_brnimage_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_brnimage_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_eva.c b/drivers/mtd/mtdsplit/mtdsplit_eva.c
+new file mode 100644
+index 000000000000..55004a6d36d7
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_eva.c
+@@ -0,0 +1,103 @@
++/*
++ *  Copyright (C) 2012 John Crispin <blogic@openwrt.org>
++ *  Copyright (C) 2015 Martin Blumenstingl <martin.blumenstingl@googlemail.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define EVA_NR_PARTS		2
++#define EVA_MAGIC		0xfeed1281
++#define EVA_FOOTER_SIZE		0x18
++#define EVA_DUMMY_SQUASHFS_SIZE	0x100
++
++struct eva_image_header {
++	uint32_t	magic;
++	uint32_t	size;
++};
++
++static int mtdsplit_parse_eva(struct mtd_info *master,
++				const struct mtd_partition **pparts,
++				struct mtd_part_parser_data *data)
++{
++	struct mtd_partition *parts;
++	struct eva_image_header hdr;
++	size_t retlen;
++	unsigned long kernel_size, rootfs_offset;
++	int err;
++
++	err = mtd_read(master, 0, sizeof(hdr), &retlen, (void *) &hdr);
++	if (err)
++		return err;
++
++	if (retlen != sizeof(hdr))
++		return -EIO;
++
++	if (le32_to_cpu(hdr.magic) != EVA_MAGIC)
++		return -EINVAL;
++
++	kernel_size = le32_to_cpu(hdr.size) + EVA_FOOTER_SIZE;
++
++	/* rootfs starts at the next 0x10000 boundary: */
++	rootfs_offset = round_up(kernel_size, 0x10000);
++
++	/* skip the dummy EVA squashfs partition (with wrong endianness): */
++	rootfs_offset += EVA_DUMMY_SQUASHFS_SIZE;
++
++	if (rootfs_offset >= master->size)
++		return -EINVAL;
++
++	err = mtd_check_rootfs_magic(master, rootfs_offset, NULL);
++	if (err)
++		return err;
++
++	parts = kzalloc(EVA_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = 0;
++	parts[0].size = kernel_size;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = master->size - rootfs_offset;
++
++	*pparts = parts;
++	return EVA_NR_PARTS;
++}
++
++static const struct of_device_id mtdsplit_eva_of_match_table[] = {
++	{ .compatible = "avm,eva-firmware" },
++	{},
++};
++
++static struct mtd_part_parser mtdsplit_eva_parser = {
++	.owner = THIS_MODULE,
++	.name = "eva-fw",
++	.of_match_table = mtdsplit_eva_of_match_table,
++	.parse_fn = mtdsplit_parse_eva,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_eva_init(void)
++{
++	register_mtd_parser(&mtdsplit_eva_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_eva_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_fit.c b/drivers/mtd/mtdsplit/mtdsplit_fit.c
+new file mode 100644
+index 000000000000..67ee33d085c7
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_fit.c
+@@ -0,0 +1,147 @@
++/*
++ * Copyright (c) 2015 The Linux Foundation
++ * Copyright (C) 2014 Gabor Juhos <juhosg@openwrt.org>
++ *
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++#include <linux/module.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/types.h>
++#include <linux/byteorder/generic.h>
++#include <linux/slab.h>
++#include <linux/of_fdt.h>
++
++#include "mtdsplit.h"
++
++struct fdt_header {
++	uint32_t magic;			 /* magic word FDT_MAGIC */
++	uint32_t totalsize;		 /* total size of DT block */
++	uint32_t off_dt_struct;		 /* offset to structure */
++	uint32_t off_dt_strings;	 /* offset to strings */
++	uint32_t off_mem_rsvmap;	 /* offset to memory reserve map */
++	uint32_t version;		 /* format version */
++	uint32_t last_comp_version;	 /* last compatible version */
++
++	/* version 2 fields below */
++	uint32_t boot_cpuid_phys;	 /* Which physical CPU id we're
++					    booting on */
++	/* version 3 fields below */
++	uint32_t size_dt_strings;	 /* size of the strings block */
++
++	/* version 17 fields below */
++	uint32_t size_dt_struct;	 /* size of the structure block */
++};
++
++static int
++mtdsplit_fit_parse(struct mtd_info *mtd,
++		   const struct mtd_partition **pparts,
++	           struct mtd_part_parser_data *data)
++{
++	struct fdt_header hdr;
++	size_t hdr_len, retlen;
++	size_t offset;
++	size_t fit_offset, fit_size;
++	size_t rootfs_offset, rootfs_size;
++	struct mtd_partition *parts;
++	int ret;
++
++	hdr_len = sizeof(struct fdt_header);
++
++	/* Parse the MTD device & search for the FIT image location */
++	for(offset = 0; offset + hdr_len <= mtd->size; offset += mtd->erasesize) {
++		ret = mtd_read(mtd, offset, hdr_len, &retlen, (void*) &hdr);
++		if (ret) {
++			pr_err("read error in \"%s\" at offset 0x%llx\n",
++			       mtd->name, (unsigned long long) offset);
++			return ret;
++		}
++
++		if (retlen != hdr_len) {
++			pr_err("short read in \"%s\"\n", mtd->name);
++			return -EIO;
++		}
++
++		/* Check the magic - see if this is a FIT image */
++		if (be32_to_cpu(hdr.magic) != OF_DT_HEADER) {
++			pr_debug("no valid FIT image found in \"%s\" at offset %llx\n",
++				 mtd->name, (unsigned long long) offset);
++			continue;
++		}
++
++		/* We found a FIT image. Let's keep going */
++		break;
++	}
++
++	fit_offset = offset;
++	fit_size = be32_to_cpu(hdr.totalsize);
++
++	if (fit_size == 0) {
++		pr_err("FIT image in \"%s\" at offset %llx has null size\n",
++		       mtd->name, (unsigned long long) fit_offset);
++		return -ENODEV;
++	}
++
++	/* Search for the rootfs partition after the FIT image */
++	ret = mtd_find_rootfs_from(mtd, fit_offset + fit_size, mtd->size,
++				   &rootfs_offset, NULL);
++	if (ret) {
++		pr_info("no rootfs found after FIT image in \"%s\"\n",
++			mtd->name);
++		return ret;
++	}
++
++	rootfs_size = mtd->size - rootfs_offset;
++
++	parts = kzalloc(2 * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = fit_offset;
++	parts[0].size = mtd_rounddown_to_eb(fit_size, mtd) + mtd->erasesize;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = rootfs_size;
++
++	*pparts = parts;
++	return 2;
++}
++
++static const struct of_device_id mtdsplit_fit_of_match_table[] = {
++	{ .compatible = "denx,fit" },
++	{},
++};
++
++static struct mtd_part_parser uimage_parser = {
++	.owner = THIS_MODULE,
++	.name = "fit-fw",
++	.of_match_table = mtdsplit_fit_of_match_table,
++	.parse_fn = mtdsplit_fit_parse,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++/**************************************************
++ * Init
++ **************************************************/
++
++static int __init mtdsplit_fit_init(void)
++{
++	register_mtd_parser(&uimage_parser);
++
++	return 0;
++}
++
++module_init(mtdsplit_fit_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_jimage.c b/drivers/mtd/mtdsplit/mtdsplit_jimage.c
+new file mode 100644
+index 000000000000..1770dd47ce15
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_jimage.c
+@@ -0,0 +1,284 @@
++/*
++ *  Copyright (C) 2018 Paweł Dembicki <paweldembicki@gmail.com> 
++ *
++ *  Based on: mtdsplit_uimage.c
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#define pr_fmt(fmt)	KBUILD_MODNAME ": " fmt
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/vmalloc.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define MAX_HEADER_LEN ( STAG_SIZE + SCH2_SIZE )
++
++#define STAG_SIZE 16
++#define STAG_ID 0x04
++#define STAG_MAGIC 0x2B24
++
++#define SCH2_SIZE 40
++#define SCH2_MAGIC 0x2124
++#define SCH2_VER 0x02
++
++/*
++ * Jboot image header,
++ * all data in little endian.
++ */
++
++struct jimage_header		//stag + sch2 jboot joined headers
++{
++	uint8_t stag_cmark;		// in factory 0xFF , in sysupgrade must be the same as stag_id
++	uint8_t stag_id;		// 0x04
++	uint16_t stag_magic;		//magic 0x2B24
++	uint32_t stag_time_stamp;	// timestamp calculated in jboot way
++	uint32_t stag_image_length;	// lentgh of kernel + sch2 header
++	uint16_t stag_image_checksum;	// negated jboot_checksum of sch2 + kernel
++	uint16_t stag_tag_checksum;	// negated jboot_checksum of stag header data
++	uint16_t sch2_magic;		// magic 0x2124
++	uint8_t sch2_cp_type;	// 0x00 for flat, 0x01 for jz, 0x02 for gzip, 0x03 for lzma
++	uint8_t sch2_version;	// 0x02 for sch2
++	uint32_t sch2_ram_addr;	// ram entry address
++	uint32_t sch2_image_len;	// kernel image length
++	uint32_t sch2_image_crc32;	// kernel image crc
++	uint32_t sch2_start_addr;	// ram start address
++	uint32_t sch2_rootfs_addr;	// rootfs flash address
++	uint32_t sch2_rootfs_len;	// rootfls length
++	uint32_t sch2_rootfs_crc32;	// rootfs crc32
++	uint32_t sch2_header_crc32;	// sch2 header crc32, durring calculation this area is replaced by zero
++	uint16_t sch2_header_length;	// sch2 header length: 0x28
++	uint16_t sch2_cmd_line_length;	// cmd line length, known zeros
++};
++
++static int
++read_jimage_header(struct mtd_info *mtd, size_t offset, u_char *buf,
++		   size_t header_len)
++{
++	size_t retlen;
++	int ret;
++
++	ret = mtd_read(mtd, offset, header_len, &retlen, buf);
++	if (ret) {
++		pr_debug("read error in \"%s\"\n", mtd->name);
++		return ret;
++	}
++
++	if (retlen != header_len) {
++		pr_debug("short read in \"%s\"\n", mtd->name);
++		return -EIO;
++	}
++
++	return 0;
++}
++
++/**
++ * __mtdsplit_parse_jimage - scan partition and create kernel + rootfs parts
++ *
++ * @find_header: function to call for a block of data that will return offset
++ *      of a valid jImage header if found
++ */
++static int __mtdsplit_parse_jimage(struct mtd_info *master,
++				   const struct mtd_partition **pparts,
++				   struct mtd_part_parser_data *data,
++				   ssize_t (*find_header)(u_char *buf, size_t len))
++{
++	struct mtd_partition *parts;
++	u_char *buf;
++	int nr_parts;
++	size_t offset;
++	size_t jimage_offset;
++	size_t jimage_size = 0;
++	size_t rootfs_offset;
++	size_t rootfs_size = 0;
++	int jimage_part, rf_part;
++	int ret;
++	enum mtdsplit_part_type type;
++
++	nr_parts = 2;
++	parts = kzalloc(nr_parts * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	buf = vmalloc(MAX_HEADER_LEN);
++	if (!buf) {
++		ret = -ENOMEM;
++		goto err_free_parts;
++	}
++
++	/* find jImage on erase block boundaries */
++	for (offset = 0; offset < master->size; offset += master->erasesize) {
++		struct jimage_header *header;
++
++		jimage_size = 0;
++
++		ret = read_jimage_header(master, offset, buf, MAX_HEADER_LEN);
++		if (ret)
++			continue;
++
++		ret = find_header(buf, MAX_HEADER_LEN);
++		if (ret < 0) {
++			pr_debug("no valid jImage found in \"%s\" at offset %llx\n",
++				 master->name, (unsigned long long) offset);
++			continue;
++		}
++		header = (struct jimage_header *)(buf + ret);
++
++		jimage_size = sizeof(*header) + header->sch2_image_len + ret;
++		if ((offset + jimage_size) > master->size) {
++			pr_debug("jImage exceeds MTD device \"%s\"\n",
++				 master->name);
++			continue;
++		}
++		break;
++	}
++
++	if (jimage_size == 0) {
++		pr_debug("no jImage found in \"%s\"\n", master->name);
++		ret = -ENODEV;
++		goto err_free_buf;
++	}
++
++	jimage_offset = offset;
++
++	if (jimage_offset == 0) {
++		jimage_part = 0;
++		rf_part = 1;
++
++		/* find the roots after the jImage */
++		ret = mtd_find_rootfs_from(master, jimage_offset + jimage_size,
++					   master->size, &rootfs_offset, &type);
++		if (ret) {
++			pr_debug("no rootfs after jImage in \"%s\"\n",
++				 master->name);
++			goto err_free_buf;
++		}
++
++		rootfs_size = master->size - rootfs_offset;
++		jimage_size = rootfs_offset - jimage_offset;
++	} else {
++		rf_part = 0;
++		jimage_part = 1;
++
++		/* check rootfs presence at offset 0 */
++		ret = mtd_check_rootfs_magic(master, 0, &type);
++		if (ret) {
++			pr_debug("no rootfs before jImage in \"%s\"\n",
++				 master->name);
++			goto err_free_buf;
++		}
++
++		rootfs_offset = 0;
++		rootfs_size = jimage_offset;
++	}
++
++	if (rootfs_size == 0) {
++		pr_debug("no rootfs found in \"%s\"\n", master->name);
++		ret = -ENODEV;
++		goto err_free_buf;
++	}
++
++	parts[jimage_part].name = KERNEL_PART_NAME;
++	parts[jimage_part].offset = jimage_offset;
++	parts[jimage_part].size = jimage_size;
++
++	if (type == MTDSPLIT_PART_TYPE_UBI)
++		parts[rf_part].name = UBI_PART_NAME;
++	else
++		parts[rf_part].name = ROOTFS_PART_NAME;
++	parts[rf_part].offset = rootfs_offset;
++	parts[rf_part].size = rootfs_size;
++
++	vfree(buf);
++
++	*pparts = parts;
++	return nr_parts;
++
++err_free_buf:
++	vfree(buf);
++
++err_free_parts:
++	kfree(parts);
++	return ret;
++}
++
++static ssize_t jimage_verify_default(u_char *buf, size_t len)
++{
++	struct jimage_header *header = (struct jimage_header *)buf;
++
++	/* default sanity checks */
++	if (header->stag_magic != STAG_MAGIC) {
++		pr_debug("invalid jImage stag header magic: %04x\n",
++			 header->stag_magic);
++		return -EINVAL;
++	}
++	if (header->sch2_magic != SCH2_MAGIC) {
++		pr_debug("invalid jImage sch2 header magic: %04x\n",
++			 header->stag_magic);
++		return -EINVAL;
++	}
++	if (header->stag_cmark != header->stag_id) {
++		pr_debug("invalid jImage stag header cmark: %02x\n",
++			 header->stag_magic);
++		return -EINVAL;
++	}
++	if (header->stag_id != STAG_ID) {
++		pr_debug("invalid jImage stag header id: %02x\n",
++			 header->stag_magic);
++		return -EINVAL;
++	}
++	if (header->sch2_version != SCH2_VER) {
++		pr_debug("invalid jImage sch2 header version: %02x\n",
++			 header->stag_magic);
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int
++mtdsplit_jimage_parse_generic(struct mtd_info *master,
++			      const struct mtd_partition **pparts,
++			      struct mtd_part_parser_data *data)
++{
++	return __mtdsplit_parse_jimage(master, pparts, data,
++				      jimage_verify_default);
++}
++
++static const struct of_device_id mtdsplit_jimage_of_match_table[] = {
++	{ .compatible = "amit,jimage" },
++	{},
++};
++
++static struct mtd_part_parser jimage_generic_parser = {
++	.owner = THIS_MODULE,
++	.name = "jimage-fw",
++	.of_match_table = mtdsplit_jimage_of_match_table,
++	.parse_fn = mtdsplit_jimage_parse_generic,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++/**************************************************
++ * Init
++ **************************************************/
++
++static int __init mtdsplit_jimage_init(void)
++{
++	register_mtd_parser(&jimage_generic_parser);
++
++	return 0;
++}
++
++module_init(mtdsplit_jimage_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_lzma.c b/drivers/mtd/mtdsplit/mtdsplit_lzma.c
+new file mode 100644
+index 000000000000..c58f7ae4bf06
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_lzma.c
+@@ -0,0 +1,104 @@
++/*
++ *  Copyright (C) 2014 Gabor Juhos <juhosg@openwrt.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/of.h>
++
++#include <asm/unaligned.h>
++
++#include "mtdsplit.h"
++
++#define LZMA_NR_PARTS		2
++#define LZMA_PROPERTIES_SIZE	5
++
++struct lzma_header {
++	u8 props[LZMA_PROPERTIES_SIZE];
++	u8 size_low[4];
++	u8 size_high[4];
++};
++
++static int mtdsplit_parse_lzma(struct mtd_info *master,
++			       const struct mtd_partition **pparts,
++			       struct mtd_part_parser_data *data)
++{
++	struct lzma_header hdr;
++	size_t hdr_len, retlen;
++	size_t rootfs_offset;
++	u32 t;
++	struct mtd_partition *parts;
++	int err;
++
++	hdr_len = sizeof(hdr);
++	err = mtd_read(master, 0, hdr_len, &retlen, (void *) &hdr);
++	if (err)
++		return err;
++
++	if (retlen != hdr_len)
++		return -EIO;
++
++	/* verify LZMA properties */
++	if (hdr.props[0] >= (9 * 5 * 5))
++		return -EINVAL;
++
++	t = get_unaligned_le32(&hdr.props[1]);
++	if (!is_power_of_2(t))
++		return -EINVAL;
++
++	t = get_unaligned_le32(&hdr.size_high);
++	if (t)
++		return -EINVAL;
++
++	err = mtd_find_rootfs_from(master, master->erasesize, master->size,
++				   &rootfs_offset, NULL);
++	if (err)
++		return err;
++
++	parts = kzalloc(LZMA_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = 0;
++	parts[0].size = rootfs_offset;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = master->size - rootfs_offset;
++
++	*pparts = parts;
++	return LZMA_NR_PARTS;
++}
++
++static const struct of_device_id mtdsplit_lzma_of_match_table[] = {
++	{ .compatible = "lzma" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, mtdsplit_lzma_of_match_table);
++
++static struct mtd_part_parser mtdsplit_lzma_parser = {
++	.owner = THIS_MODULE,
++	.name = "lzma-fw",
++	.of_match_table = mtdsplit_lzma_of_match_table,
++	.parse_fn = mtdsplit_parse_lzma,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_lzma_init(void)
++{
++	register_mtd_parser(&mtdsplit_lzma_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_lzma_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_minor.c b/drivers/mtd/mtdsplit/mtdsplit_minor.c
+new file mode 100644
+index 000000000000..af6822e11ab3
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_minor.c
+@@ -0,0 +1,125 @@
++/*
++ *  MTD splitter for MikroTik NOR devices
++ *
++ *  Copyright (C) 2017 Thibaut VARENE <varenet@parisc-linux.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ *  The rootfs is expected at erase-block boundary due to the use of
++ *  mtd_find_rootfs_from(). We use a trimmed down version of the yaffs header
++ *  for two main reasons:
++ *  - the original header uses weakly defined types (int, enum...) which can
++ *    vary in length depending on build host (and the struct is not packed),
++ *    and the name field can have a different total length depending on
++ *    whether or not the yaffs code was _built_ with unicode support.
++ *  - the only field that could be of real use here (file_size_low) contains
++ *    invalid data in the header generated by kernel2minor, so we cannot use
++ *    it to infer the exact position of the rootfs and do away with
++ *    mtd_find_rootfs_from() (and thus have non-EB-aligned rootfs).
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/string.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define YAFFS_OBJECT_TYPE_FILE	0x1
++#define YAFFS_OBJECTID_ROOT	0x1
++#define YAFFS_SUM_UNUSED	0xFFFF
++#define YAFFS_NAME		"kernel"
++
++#define MINOR_NR_PARTS		2
++
++/*
++ * This structure is based on yaffs_obj_hdr from yaffs_guts.h
++ * The weak types match upstream. The fields have cpu-endianness
++ */
++struct minor_header {
++	int yaffs_type;
++	int yaffs_obj_id;
++	u16 yaffs_sum_unused;
++	char yaffs_name[sizeof(YAFFS_NAME)];
++};
++
++static int mtdsplit_parse_minor(struct mtd_info *master,
++				const struct mtd_partition **pparts,
++				struct mtd_part_parser_data *data)
++{
++	struct minor_header hdr;
++	size_t hdr_len, retlen;
++	size_t rootfs_offset;
++	struct mtd_partition *parts;
++	int err;
++
++	hdr_len = sizeof(hdr);
++	err = mtd_read(master, 0, hdr_len, &retlen, (void *) &hdr);
++	if (err)
++		return err;
++
++	if (retlen != hdr_len)
++		return -EIO;
++
++	/* match header */
++	if (hdr.yaffs_type != YAFFS_OBJECT_TYPE_FILE)
++		return -EINVAL;
++
++	if (hdr.yaffs_obj_id != YAFFS_OBJECTID_ROOT)
++		return -EINVAL;
++
++	if (hdr.yaffs_sum_unused != YAFFS_SUM_UNUSED)
++		return -EINVAL;
++
++	if (memcmp(hdr.yaffs_name, YAFFS_NAME, sizeof(YAFFS_NAME)))
++		return -EINVAL;
++
++	err = mtd_find_rootfs_from(master, master->erasesize, master->size,
++				   &rootfs_offset, NULL);
++	if (err)
++		return err;
++
++	parts = kzalloc(MINOR_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = 0;
++	parts[0].size = rootfs_offset;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = master->size - rootfs_offset;
++
++	*pparts = parts;
++	return MINOR_NR_PARTS;
++}
++
++static const struct of_device_id mtdsplit_minor_of_match_table[] = {
++	{ .compatible = "mikrotik,minor" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, mtdsplit_minor_of_match_table);
++
++static struct mtd_part_parser mtdsplit_minor_parser = {
++	.owner = THIS_MODULE,
++	.name = "minor-fw",
++	.of_match_table = mtdsplit_minor_of_match_table,
++	.parse_fn = mtdsplit_parse_minor,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_minor_init(void)
++{
++	register_mtd_parser(&mtdsplit_minor_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_minor_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_seama.c b/drivers/mtd/mtdsplit/mtdsplit_seama.c
+new file mode 100644
+index 000000000000..5d49171b1f74
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_seama.c
+@@ -0,0 +1,118 @@
++/*
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define SEAMA_MAGIC		0x5EA3A417
++#define SEAMA_NR_PARTS		2
++#define SEAMA_MIN_ROOTFS_OFFS	0x80000	/* 512KiB */
++
++struct seama_header {
++	__be32	magic;		/* should always be SEAMA_MAGIC. */
++	__be16	reserved;	/* reserved for  */
++	__be16	metasize;	/* size of the META data */
++	__be32	size;		/* size of the image */
++	u8	md5[16];	/* digest */
++};
++
++static int mtdsplit_parse_seama(struct mtd_info *master,
++				const struct mtd_partition **pparts,
++				struct mtd_part_parser_data *data)
++{
++	struct seama_header hdr;
++	size_t hdr_len, retlen, kernel_ent_size;
++	size_t rootfs_offset;
++	struct mtd_partition *parts;
++	enum mtdsplit_part_type type;
++	int err;
++
++	hdr_len = sizeof(hdr);
++	err = mtd_read(master, 0, hdr_len, &retlen, (void *) &hdr);
++	if (err)
++		return err;
++
++	if (retlen != hdr_len)
++		return -EIO;
++
++	/* sanity checks */
++	if (be32_to_cpu(hdr.magic) != SEAMA_MAGIC)
++		return -EINVAL;
++
++	kernel_ent_size = hdr_len + be32_to_cpu(hdr.size) +
++			  be16_to_cpu(hdr.metasize);
++	if (kernel_ent_size > master->size)
++		return -EINVAL;
++
++	/* Check for the rootfs right after Seama entity with a kernel. */
++	err = mtd_check_rootfs_magic(master, kernel_ent_size, &type);
++	if (!err) {
++		rootfs_offset = kernel_ent_size;
++	} else {
++		/*
++		 * On some devices firmware entity might contain both: kernel
++		 * and rootfs. We can't determine kernel size so we just have to
++		 * look for rootfs magic.
++		 * Start the search from an arbitrary offset.
++		 */
++		err = mtd_find_rootfs_from(master, SEAMA_MIN_ROOTFS_OFFS,
++					   master->size, &rootfs_offset, &type);
++		if (err)
++			return err;
++	}
++
++	parts = kzalloc(SEAMA_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = sizeof hdr + be16_to_cpu(hdr.metasize);
++	parts[0].size = rootfs_offset - parts[0].offset;
++
++	if (type == MTDSPLIT_PART_TYPE_UBI)
++		parts[1].name = UBI_PART_NAME;
++	else
++		parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = master->size - rootfs_offset;
++
++	*pparts = parts;
++	return SEAMA_NR_PARTS;
++}
++
++static const struct of_device_id mtdsplit_seama_of_match_table[] = {
++	{ .compatible = "seama" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, mtdsplit_seama_of_match_table);
++
++static struct mtd_part_parser mtdsplit_seama_parser = {
++	.owner = THIS_MODULE,
++	.name = "seama-fw",
++	.of_match_table = mtdsplit_seama_of_match_table,
++	.parse_fn = mtdsplit_parse_seama,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_seama_init(void)
++{
++	register_mtd_parser(&mtdsplit_seama_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_seama_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_squashfs.c b/drivers/mtd/mtdsplit/mtdsplit_squashfs.c
+new file mode 100644
+index 000000000000..79e1f73bca15
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_squashfs.c
+@@ -0,0 +1,72 @@
++/*
++ *  Copyright (C) 2013 Felix Fietkau <nbd@nbd.name>
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#define pr_fmt(fmt)	KBUILD_MODNAME ": " fmt
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/magic.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++
++#include "mtdsplit.h"
++
++static int
++mtdsplit_parse_squashfs(struct mtd_info *master,
++			const struct mtd_partition **pparts,
++			struct mtd_part_parser_data *data)
++{
++	struct mtd_partition *part;
++	struct mtd_info *parent_mtd;
++	size_t part_offset;
++	size_t squashfs_len;
++	int err;
++
++	err = mtd_get_squashfs_len(master, 0, &squashfs_len);
++	if (err)
++		return err;
++
++	parent_mtd = mtdpart_get_master(master);
++	part_offset = mtdpart_get_offset(master);
++
++	part = kzalloc(sizeof(*part), GFP_KERNEL);
++	if (!part) {
++		pr_alert("unable to allocate memory for \"%s\" partition\n",
++			 ROOTFS_SPLIT_NAME);
++		return -ENOMEM;
++	}
++
++	part->name = ROOTFS_SPLIT_NAME;
++	part->offset = mtd_roundup_to_eb(part_offset + squashfs_len,
++					 parent_mtd) - part_offset;
++	part->size = mtd_rounddown_to_eb(master->size - part->offset, master);
++
++	*pparts = part;
++	return 1;
++}
++
++static struct mtd_part_parser mtdsplit_squashfs_parser = {
++	.owner = THIS_MODULE,
++	.name = "squashfs-split",
++	.parse_fn = mtdsplit_parse_squashfs,
++	.type = MTD_PARSER_TYPE_ROOTFS,
++};
++
++static int __init mtdsplit_squashfs_init(void)
++{
++	register_mtd_parser(&mtdsplit_squashfs_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_squashfs_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_tplink.c b/drivers/mtd/mtdsplit/mtdsplit_tplink.c
+new file mode 100644
+index 000000000000..8909c107a094
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_tplink.c
+@@ -0,0 +1,176 @@
++/*
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *  Copyright (C) 2014 Felix Fietkau <nbd@nbd.name>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define TPLINK_NR_PARTS		2
++#define TPLINK_MIN_ROOTFS_OFFS	0x80000	/* 512KiB */
++
++#define MD5SUM_LEN  16
++
++struct fw_v1 {
++	char		vendor_name[24];
++	char		fw_version[36];
++	uint32_t	hw_id;		/* hardware id */
++	uint32_t	hw_rev;		/* hardware revision */
++	uint32_t	unk1;
++	uint8_t		md5sum1[MD5SUM_LEN];
++	uint32_t	unk2;
++	uint8_t		md5sum2[MD5SUM_LEN];
++	uint32_t	unk3;
++	uint32_t	kernel_la;	/* kernel load address */
++	uint32_t	kernel_ep;	/* kernel entry point */
++	uint32_t	fw_length;	/* total length of the firmware */
++	uint32_t	kernel_ofs;	/* kernel data offset */
++	uint32_t	kernel_len;	/* kernel data length */
++	uint32_t	rootfs_ofs;	/* rootfs data offset */
++	uint32_t	rootfs_len;	/* rootfs data length */
++	uint32_t	boot_ofs;	/* bootloader data offset */
++	uint32_t	boot_len;	/* bootloader data length */
++	uint8_t		pad[360];
++} __attribute__ ((packed));
++
++struct fw_v2 {
++	char		fw_version[48]; /* 0x04: fw version string */
++	uint32_t	hw_id;		/* 0x34: hardware id */
++	uint32_t	hw_rev;		/* 0x38: FIXME: hardware revision? */
++	uint32_t	unk1;	        /* 0x3c: 0x00000000 */
++	uint8_t		md5sum1[MD5SUM_LEN]; /* 0x40 */
++	uint32_t	unk2;		/* 0x50: 0x00000000 */
++	uint8_t		md5sum2[MD5SUM_LEN]; /* 0x54 */
++	uint32_t	unk3;		/* 0x64: 0xffffffff */
++
++	uint32_t	kernel_la;	/* 0x68: kernel load address */
++	uint32_t	kernel_ep;	/* 0x6c: kernel entry point */
++	uint32_t	fw_length;	/* 0x70: total length of the image */
++	uint32_t	kernel_ofs;	/* 0x74: kernel data offset */
++	uint32_t	kernel_len;	/* 0x78: kernel data length */
++	uint32_t	rootfs_ofs;	/* 0x7c: rootfs data offset */
++	uint32_t	rootfs_len;	/* 0x80: rootfs data length */
++	uint32_t	boot_ofs;	/* 0x84: FIXME: seems to be unused */
++	uint32_t	boot_len;	/* 0x88: FIXME: seems to be unused */
++	uint16_t	unk4;		/* 0x8c: 0x55aa */
++	uint8_t		sver_hi;	/* 0x8e */
++	uint8_t		sver_lo;	/* 0x8f */
++	uint8_t		unk5;		/* 0x90: magic: 0xa5 */
++	uint8_t		ver_hi;         /* 0x91 */
++	uint8_t		ver_mid;        /* 0x92 */
++	uint8_t		ver_lo;         /* 0x93 */
++	uint8_t		pad[364];
++} __attribute__ ((packed));
++
++struct tplink_fw_header {
++	uint32_t version;
++	union {
++		struct fw_v1 v1;
++		struct fw_v2 v2;
++	};
++};
++
++static int mtdsplit_parse_tplink(struct mtd_info *master,
++				 const struct mtd_partition **pparts,
++				 struct mtd_part_parser_data *data)
++{
++	struct tplink_fw_header hdr;
++	size_t hdr_len, retlen, kernel_size;
++	size_t rootfs_offset;
++	struct mtd_partition *parts;
++	int err;
++
++	hdr_len = sizeof(hdr);
++	err = mtd_read(master, 0, hdr_len, &retlen, (void *) &hdr);
++	if (err)
++		return err;
++
++	if (retlen != hdr_len)
++		return -EIO;
++
++	switch (le32_to_cpu(hdr.version)) {
++	case 1:
++		if (be32_to_cpu(hdr.v1.kernel_ofs) != sizeof(hdr))
++			return -EINVAL;
++
++		kernel_size = sizeof(hdr) + be32_to_cpu(hdr.v1.kernel_len);
++		rootfs_offset = be32_to_cpu(hdr.v1.rootfs_ofs);
++		break;
++	case 2:
++	case 3:
++		if (be32_to_cpu(hdr.v2.kernel_ofs) != sizeof(hdr))
++			return -EINVAL;
++
++		kernel_size = sizeof(hdr) + be32_to_cpu(hdr.v2.kernel_len);
++		rootfs_offset = be32_to_cpu(hdr.v2.rootfs_ofs);
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	if (kernel_size > master->size)
++		return -EINVAL;
++
++	/* Find the rootfs */
++	err = mtd_check_rootfs_magic(master, rootfs_offset, NULL);
++	if (err) {
++		/*
++		 * The size in the header might cover the rootfs as well.
++		 * Start the search from an arbitrary offset.
++		 */
++		err = mtd_find_rootfs_from(master, TPLINK_MIN_ROOTFS_OFFS,
++					   master->size, &rootfs_offset, NULL);
++		if (err)
++			return err;
++	}
++
++	parts = kzalloc(TPLINK_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = 0;
++	parts[0].size = kernel_size;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = master->size - rootfs_offset;
++
++	*pparts = parts;
++	return TPLINK_NR_PARTS;
++}
++
++static const struct of_device_id mtdsplit_tplink_of_match_table[] = {
++	{ .compatible = "tplink,firmware" },
++	{},
++};
++
++static struct mtd_part_parser mtdsplit_tplink_parser = {
++	.owner = THIS_MODULE,
++	.name = "tplink-fw",
++	.of_match_table = mtdsplit_tplink_of_match_table,
++	.parse_fn = mtdsplit_parse_tplink,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_tplink_init(void)
++{
++	register_mtd_parser(&mtdsplit_tplink_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_tplink_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_trx.c b/drivers/mtd/mtdsplit/mtdsplit_trx.c
+new file mode 100644
+index 000000000000..b853ec9e5283
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_trx.c
+@@ -0,0 +1,155 @@
++/*
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *  Copyright (C) 2014 Felix Fietkau <nbd@nbd.name>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#define pr_fmt(fmt)	KBUILD_MODNAME ": " fmt
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define TRX_MAGIC   0x30524448  /* "HDR0" */
++
++struct trx_header {
++	__le32 magic;
++	__le32 len;
++	__le32 crc32;
++	__le32 flag_version;
++	__le32 offset[4];
++};
++
++static int
++read_trx_header(struct mtd_info *mtd, size_t offset,
++		   struct trx_header *header)
++{
++	size_t header_len;
++	size_t retlen;
++	int ret;
++
++	header_len = sizeof(*header);
++	ret = mtd_read(mtd, offset, header_len, &retlen,
++		       (unsigned char *) header);
++	if (ret) {
++		pr_debug("read error in \"%s\"\n", mtd->name);
++		return ret;
++	}
++
++	if (retlen != header_len) {
++		pr_debug("short read in \"%s\"\n", mtd->name);
++		return -EIO;
++	}
++
++	return 0;
++}
++
++static int
++mtdsplit_parse_trx(struct mtd_info *master,
++		   const struct mtd_partition **pparts,
++		   struct mtd_part_parser_data *data)
++{
++	struct mtd_partition *parts;
++	struct trx_header hdr;
++	int nr_parts;
++	size_t offset;
++	size_t trx_offset;
++	size_t trx_size = 0;
++	size_t rootfs_offset;
++	size_t rootfs_size = 0;
++	int ret;
++
++	nr_parts = 2;
++	parts = kzalloc(nr_parts * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	/* find trx image on erase block boundaries */
++	for (offset = 0; offset < master->size; offset += master->erasesize) {
++		trx_size = 0;
++
++		ret = read_trx_header(master, offset, &hdr);
++		if (ret)
++			continue;
++
++		if (hdr.magic != cpu_to_le32(TRX_MAGIC)) {
++			pr_debug("no valid trx header found in \"%s\" at offset %llx\n",
++				 master->name, (unsigned long long) offset);
++			continue;
++		}
++
++		trx_size = le32_to_cpu(hdr.len);
++		if ((offset + trx_size) > master->size) {
++			pr_debug("trx image exceeds MTD device \"%s\"\n",
++				 master->name);
++			continue;
++		}
++		break;
++	}
++
++	if (trx_size == 0) {
++		pr_debug("no trx header found in \"%s\"\n", master->name);
++		ret = -ENODEV;
++		goto err;
++	}
++
++	trx_offset = offset + hdr.offset[0];
++	rootfs_offset = offset + hdr.offset[1];
++	rootfs_size = master->size - rootfs_offset;
++	trx_size = rootfs_offset - trx_offset;
++
++	if (rootfs_size == 0) {
++		pr_debug("no rootfs found in \"%s\"\n", master->name);
++		ret = -ENODEV;
++		goto err;
++	}
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = trx_offset;
++	parts[0].size = trx_size;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = rootfs_size;
++
++	*pparts = parts;
++	return nr_parts;
++
++err:
++	kfree(parts);
++	return ret;
++}
++
++static const struct of_device_id trx_parser_of_match_table[] = {
++	{ .compatible = "openwrt,trx" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, trx_parser_of_match_table);
++
++static struct mtd_part_parser trx_parser = {
++	.owner = THIS_MODULE,
++	.name = "trx-fw",
++	.of_match_table = trx_parser_of_match_table,
++	.parse_fn = mtdsplit_parse_trx,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_trx_init(void)
++{
++	register_mtd_parser(&trx_parser);
++
++	return 0;
++}
++
++module_init(mtdsplit_trx_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_uimage.c b/drivers/mtd/mtdsplit/mtdsplit_uimage.c
+new file mode 100644
+index 000000000000..525ad8218bd2
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_uimage.c
+@@ -0,0 +1,478 @@
++/*
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#define pr_fmt(fmt)	KBUILD_MODNAME ": " fmt
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/vmalloc.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/version.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++/*
++ * uimage_header itself is only 64B, but it may be prepended with another data.
++ * Currently the biggest size is for Fon(Foxconn) devices: 64B + 32B
++ */
++#define MAX_HEADER_LEN		96
++
++#define IH_MAGIC	0x27051956	/* Image Magic Number		*/
++#define IH_NMLEN		32	/* Image Name Length		*/
++
++#define IH_OS_LINUX		5	/* Linux	*/
++
++#define IH_TYPE_KERNEL		2	/* OS Kernel Image		*/
++#define IH_TYPE_FILESYSTEM	7	/* Filesystem Image		*/
++
++/*
++ * Legacy format image header,
++ * all data in network byte order (aka natural aka bigendian).
++ */
++struct uimage_header {
++	uint32_t	ih_magic;	/* Image Header Magic Number	*/
++	uint32_t	ih_hcrc;	/* Image Header CRC Checksum	*/
++	uint32_t	ih_time;	/* Image Creation Timestamp	*/
++	uint32_t	ih_size;	/* Image Data Size		*/
++	uint32_t	ih_load;	/* Data	 Load  Address		*/
++	uint32_t	ih_ep;		/* Entry Point Address		*/
++	uint32_t	ih_dcrc;	/* Image Data CRC Checksum	*/
++	uint8_t		ih_os;		/* Operating System		*/
++	uint8_t		ih_arch;	/* CPU architecture		*/
++	uint8_t		ih_type;	/* Image Type			*/
++	uint8_t		ih_comp;	/* Compression Type		*/
++	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
++};
++
++static int
++read_uimage_header(struct mtd_info *mtd, size_t offset, u_char *buf,
++		   size_t header_len)
++{
++	size_t retlen;
++	int ret;
++
++	ret = mtd_read(mtd, offset, header_len, &retlen, buf);
++	if (ret) {
++		pr_debug("read error in \"%s\"\n", mtd->name);
++		return ret;
++	}
++
++	if (retlen != header_len) {
++		pr_debug("short read in \"%s\"\n", mtd->name);
++		return -EIO;
++	}
++
++	return 0;
++}
++
++/**
++ * __mtdsplit_parse_uimage - scan partition and create kernel + rootfs parts
++ *
++ * @find_header: function to call for a block of data that will return offset
++ *      and tail padding length of a valid uImage header if found
++ */
++static int __mtdsplit_parse_uimage(struct mtd_info *master,
++		   const struct mtd_partition **pparts,
++		   struct mtd_part_parser_data *data,
++		   ssize_t (*find_header)(u_char *buf, size_t len, int *extralen))
++{
++	struct mtd_partition *parts;
++	u_char *buf;
++	int nr_parts;
++	size_t offset;
++	size_t uimage_offset;
++	size_t uimage_size = 0;
++	size_t rootfs_offset;
++	size_t rootfs_size = 0;
++	int uimage_part, rf_part;
++	int ret;
++	int extralen;
++	enum mtdsplit_part_type type;
++
++	nr_parts = 2;
++	parts = kzalloc(nr_parts * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	buf = vmalloc(MAX_HEADER_LEN);
++	if (!buf) {
++		ret = -ENOMEM;
++		goto err_free_parts;
++	}
++
++	/* find uImage on erase block boundaries */
++	for (offset = 0; offset < master->size; offset += master->erasesize) {
++		struct uimage_header *header;
++
++		uimage_size = 0;
++
++		ret = read_uimage_header(master, offset, buf, MAX_HEADER_LEN);
++		if (ret)
++			continue;
++
++		extralen = 0;
++		ret = find_header(buf, MAX_HEADER_LEN, &extralen);
++		if (ret < 0) {
++			pr_debug("no valid uImage found in \"%s\" at offset %llx\n",
++				 master->name, (unsigned long long) offset);
++			continue;
++		}
++		header = (struct uimage_header *)(buf + ret);
++
++		uimage_size = sizeof(*header) +
++				be32_to_cpu(header->ih_size) + ret + extralen;
++
++		if ((offset + uimage_size) > master->size) {
++			pr_debug("uImage exceeds MTD device \"%s\"\n",
++				 master->name);
++			continue;
++		}
++		break;
++	}
++
++	if (uimage_size == 0) {
++		pr_debug("no uImage found in \"%s\"\n", master->name);
++		ret = -ENODEV;
++		goto err_free_buf;
++	}
++
++	uimage_offset = offset;
++
++	if (uimage_offset == 0) {
++		uimage_part = 0;
++		rf_part = 1;
++
++		/* find the roots after the uImage */
++		ret = mtd_find_rootfs_from(master, uimage_offset + uimage_size,
++					   master->size, &rootfs_offset, &type);
++		if (ret) {
++			pr_debug("no rootfs after uImage in \"%s\"\n",
++				 master->name);
++			goto err_free_buf;
++		}
++
++		rootfs_size = master->size - rootfs_offset;
++		uimage_size = rootfs_offset - uimage_offset;
++	} else {
++		rf_part = 0;
++		uimage_part = 1;
++
++		/* check rootfs presence at offset 0 */
++		ret = mtd_check_rootfs_magic(master, 0, &type);
++		if (ret) {
++			pr_debug("no rootfs before uImage in \"%s\"\n",
++				 master->name);
++			goto err_free_buf;
++		}
++
++		rootfs_offset = 0;
++		rootfs_size = uimage_offset;
++	}
++
++	if (rootfs_size == 0) {
++		pr_debug("no rootfs found in \"%s\"\n", master->name);
++		ret = -ENODEV;
++		goto err_free_buf;
++	}
++
++	parts[uimage_part].name = KERNEL_PART_NAME;
++	parts[uimage_part].offset = uimage_offset;
++	parts[uimage_part].size = uimage_size;
++
++	if (type == MTDSPLIT_PART_TYPE_UBI)
++		parts[rf_part].name = UBI_PART_NAME;
++	else
++		parts[rf_part].name = ROOTFS_PART_NAME;
++	parts[rf_part].offset = rootfs_offset;
++	parts[rf_part].size = rootfs_size;
++
++	vfree(buf);
++
++	*pparts = parts;
++	return nr_parts;
++
++err_free_buf:
++	vfree(buf);
++
++err_free_parts:
++	kfree(parts);
++	return ret;
++}
++
++static ssize_t uimage_verify_default(u_char *buf, size_t len, int *extralen)
++{
++	struct uimage_header *header = (struct uimage_header *)buf;
++
++	/* default sanity checks */
++	if (be32_to_cpu(header->ih_magic) != IH_MAGIC) {
++		pr_debug("invalid uImage magic: %08x\n",
++			 be32_to_cpu(header->ih_magic));
++		return -EINVAL;
++	}
++
++	if (header->ih_os != IH_OS_LINUX) {
++		pr_debug("invalid uImage OS: %08x\n",
++			 be32_to_cpu(header->ih_os));
++		return -EINVAL;
++	}
++
++	if (header->ih_type != IH_TYPE_KERNEL) {
++		pr_debug("invalid uImage type: %08x\n",
++			 be32_to_cpu(header->ih_type));
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int
++mtdsplit_uimage_parse_generic(struct mtd_info *master,
++			      const struct mtd_partition **pparts,
++			      struct mtd_part_parser_data *data)
++{
++	return __mtdsplit_parse_uimage(master, pparts, data,
++				      uimage_verify_default);
++}
++
++static const struct of_device_id mtdsplit_uimage_of_match_table[] = {
++	{ .compatible = "denx,uimage" },
++	{},
++};
++
++static struct mtd_part_parser uimage_generic_parser = {
++	.owner = THIS_MODULE,
++	.name = "uimage-fw",
++	.of_match_table = mtdsplit_uimage_of_match_table,
++	.parse_fn = mtdsplit_uimage_parse_generic,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++#define FW_MAGIC_WNR2000V1	0x32303031
++#define FW_MAGIC_WNR2000V3	0x32303033
++#define FW_MAGIC_WNR2000V4	0x32303034
++#define FW_MAGIC_WNR2200	0x32323030
++#define FW_MAGIC_WNR612V2	0x32303631
++#define FW_MAGIC_WNR1000V2	0x31303031
++#define FW_MAGIC_WNR1000V2_VC	0x31303030
++#define FW_MAGIC_WNDR3700	0x33373030
++#define FW_MAGIC_WNDR3700V2	0x33373031
++#define FW_MAGIC_WPN824N	0x31313030
++
++static ssize_t uimage_verify_wndr3700(u_char *buf, size_t len, int *extralen)
++{
++	struct uimage_header *header = (struct uimage_header *)buf;
++	uint8_t expected_type = IH_TYPE_FILESYSTEM;
++
++	switch (be32_to_cpu(header->ih_magic)) {
++	case FW_MAGIC_WNR612V2:
++	case FW_MAGIC_WNR1000V2:
++	case FW_MAGIC_WNR1000V2_VC:
++	case FW_MAGIC_WNR2000V1:
++	case FW_MAGIC_WNR2000V3:
++	case FW_MAGIC_WNR2200:
++	case FW_MAGIC_WNDR3700:
++	case FW_MAGIC_WNDR3700V2:
++	case FW_MAGIC_WPN824N:
++		break;
++	case FW_MAGIC_WNR2000V4:
++		expected_type = IH_TYPE_KERNEL;
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	if (header->ih_os != IH_OS_LINUX ||
++	    header->ih_type != expected_type)
++		return -EINVAL;
++
++	return 0;
++}
++
++static int
++mtdsplit_uimage_parse_netgear(struct mtd_info *master,
++			      const struct mtd_partition **pparts,
++			      struct mtd_part_parser_data *data)
++{
++	return __mtdsplit_parse_uimage(master, pparts, data,
++				      uimage_verify_wndr3700);
++}
++
++static const struct of_device_id mtdsplit_uimage_netgear_of_match_table[] = {
++	{ .compatible = "netgear,uimage" },
++	{},
++};
++
++static struct mtd_part_parser uimage_netgear_parser = {
++	.owner = THIS_MODULE,
++	.name = "netgear-fw",
++	.of_match_table = mtdsplit_uimage_netgear_of_match_table,
++	.parse_fn = mtdsplit_uimage_parse_netgear,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++/**************************************************
++ * Edimax
++ **************************************************/
++
++#define FW_EDIMAX_OFFSET	20
++#define FW_MAGIC_EDIMAX		0x43535953
++
++static ssize_t uimage_find_edimax(u_char *buf, size_t len, int *extralen)
++{
++	u32 *magic;
++
++	if (len < FW_EDIMAX_OFFSET + sizeof(struct uimage_header)) {
++		pr_err("Buffer too small for checking Edimax header\n");
++		return -ENOSPC;
++	}
++
++	magic = (u32 *)buf;
++	if (be32_to_cpu(*magic) != FW_MAGIC_EDIMAX)
++		return -EINVAL;
++
++	if (!uimage_verify_default(buf + FW_EDIMAX_OFFSET, len, extralen))
++		return FW_EDIMAX_OFFSET;
++
++	return -EINVAL;
++}
++
++static int
++mtdsplit_uimage_parse_edimax(struct mtd_info *master,
++			      const struct mtd_partition **pparts,
++			      struct mtd_part_parser_data *data)
++{
++	return __mtdsplit_parse_uimage(master, pparts, data,
++				       uimage_find_edimax);
++}
++
++static const struct of_device_id mtdsplit_uimage_edimax_of_match_table[] = {
++	{ .compatible = "edimax,uimage" },
++	{},
++};
++
++static struct mtd_part_parser uimage_edimax_parser = {
++	.owner = THIS_MODULE,
++	.name = "edimax-fw",
++	.of_match_table = mtdsplit_uimage_edimax_of_match_table,
++	.parse_fn = mtdsplit_uimage_parse_edimax,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++
++/**************************************************
++ * Fon(Foxconn)
++ **************************************************/
++
++#define FONFXC_PAD_LEN		32
++
++static ssize_t uimage_find_fonfxc(u_char *buf, size_t len, int *extralen)
++{
++	if (uimage_verify_default(buf, len, extralen) < 0)
++		return -EINVAL;
++
++	*extralen = FONFXC_PAD_LEN;
++
++	return 0;
++}
++
++static int
++mtdsplit_uimage_parse_fonfxc(struct mtd_info *master,
++			      const struct mtd_partition **pparts,
++			      struct mtd_part_parser_data *data)
++{
++	return __mtdsplit_parse_uimage(master, pparts, data,
++				       uimage_find_fonfxc);
++}
++
++static const struct of_device_id mtdsplit_uimage_fonfxc_of_match_table[] = {
++	{ .compatible = "fonfxc,uimage" },
++	{},
++};
++
++static struct mtd_part_parser uimage_fonfxc_parser = {
++	.owner = THIS_MODULE,
++	.name = "fonfxc-fw",
++	.of_match_table = mtdsplit_uimage_fonfxc_of_match_table,
++	.parse_fn = mtdsplit_uimage_parse_fonfxc,
++};
++
++/**************************************************
++ * OKLI (OpenWrt Kernel Loader Image)
++ **************************************************/
++
++#define IH_MAGIC_OKLI	0x4f4b4c49
++
++static ssize_t uimage_verify_okli(u_char *buf, size_t len, int *extralen)
++{
++	struct uimage_header *header = (struct uimage_header *)buf;
++
++	/* default sanity checks */
++	if (be32_to_cpu(header->ih_magic) != IH_MAGIC_OKLI) {
++		pr_debug("invalid uImage magic: %08x\n",
++			 be32_to_cpu(header->ih_magic));
++		return -EINVAL;
++	}
++
++	if (header->ih_os != IH_OS_LINUX) {
++		pr_debug("invalid uImage OS: %08x\n",
++			 be32_to_cpu(header->ih_os));
++		return -EINVAL;
++	}
++
++	if (header->ih_type != IH_TYPE_KERNEL) {
++		pr_debug("invalid uImage type: %08x\n",
++			 be32_to_cpu(header->ih_type));
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int
++mtdsplit_uimage_parse_okli(struct mtd_info *master,
++			      const struct mtd_partition **pparts,
++			      struct mtd_part_parser_data *data)
++{
++	return __mtdsplit_parse_uimage(master, pparts, data,
++				      uimage_verify_okli);
++}
++
++static const struct of_device_id mtdsplit_uimage_okli_of_match_table[] = {
++	{ .compatible = "openwrt,okli" },
++	{},
++};
++
++static struct mtd_part_parser uimage_okli_parser = {
++	.owner = THIS_MODULE,
++	.name = "okli-fw",
++	.of_match_table = mtdsplit_uimage_okli_of_match_table,
++	.parse_fn = mtdsplit_uimage_parse_okli,
++};
++
++/**************************************************
++ * Init
++ **************************************************/
++
++static int __init mtdsplit_uimage_init(void)
++{
++	register_mtd_parser(&uimage_generic_parser);
++	register_mtd_parser(&uimage_netgear_parser);
++	register_mtd_parser(&uimage_edimax_parser);
++	register_mtd_parser(&uimage_fonfxc_parser);
++	register_mtd_parser(&uimage_okli_parser);
++
++	return 0;
++}
++
++module_init(mtdsplit_uimage_init);
+diff --git a/drivers/mtd/mtdsplit/mtdsplit_wrgg.c b/drivers/mtd/mtdsplit/mtdsplit_wrgg.c
+new file mode 100644
+index 000000000000..dfd6058ae7e4
+--- /dev/null
++++ b/drivers/mtd/mtdsplit/mtdsplit_wrgg.c
+@@ -0,0 +1,142 @@
++/*
++ *  Copyright (C) 2013 Gabor Juhos <juhosg@openwrt.org>
++ *  Copyright (C) 2014 Felix Fietkau <nbd@nbd.name>
++ *  Copyright (C) 2016 Stijn Tintel <stijn@linux-ipv6.be>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/of.h>
++
++#include "mtdsplit.h"
++
++#define WRGG_NR_PARTS		2
++#define WRGG_MIN_ROOTFS_OFFS	0x80000	/* 512KiB */
++#define WRGG03_MAGIC		0x20080321
++#define WRG_MAGIC		0x20040220
++
++struct wrgg03_header {
++	char		signature[32];
++	uint32_t	magic1;
++	uint32_t	magic2;
++	char		version[16];
++	char		model[16];
++	uint32_t	flag[2];
++	uint32_t	reserve[2];
++	char		buildno[16];
++	uint32_t	size;
++	uint32_t	offset;
++	char		devname[32];
++	char		digest[16];
++} __attribute__ ((packed));
++
++struct wrg_header {
++	char		signature[32];
++	uint32_t	magic1;
++	uint32_t	magic2;
++	uint32_t	size;
++	uint32_t	offset;
++	char		devname[32];
++	char		digest[16];
++} __attribute__ ((packed));
++
++
++static int mtdsplit_parse_wrgg(struct mtd_info *master,
++			       const struct mtd_partition **pparts,
++			       struct mtd_part_parser_data *data)
++{
++	struct wrgg03_header hdr;
++	size_t hdr_len, retlen, kernel_ent_size;
++	size_t rootfs_offset;
++	struct mtd_partition *parts;
++	enum mtdsplit_part_type type;
++	int err;
++
++	hdr_len = sizeof(hdr);
++	err = mtd_read(master, 0, hdr_len, &retlen, (void *) &hdr);
++	if (err)
++		return err;
++
++	if (retlen != hdr_len)
++		return -EIO;
++
++	/* sanity checks */
++	if (le32_to_cpu(hdr.magic1) == WRGG03_MAGIC) {
++		kernel_ent_size = hdr_len + be32_to_cpu(hdr.size);
++		/*
++		 * If this becomes silly big it's probably because the
++		 * WRGG image is little-endian.
++		 */
++		if (kernel_ent_size > master->size)
++			kernel_ent_size = hdr_len + le32_to_cpu(hdr.size);
++
++		/* Now what ?! It's neither */
++		if (kernel_ent_size > master->size)
++			return -EINVAL;
++	} else if (le32_to_cpu(hdr.magic1) == WRG_MAGIC) {
++		kernel_ent_size = sizeof(struct wrg_header) + le32_to_cpu(
++		                  ((struct wrg_header*)&hdr)->size);
++	} else {
++		return -EINVAL;
++	}
++
++	if (kernel_ent_size > master->size)
++		return -EINVAL;
++
++	/*
++	 * The size in the header covers the rootfs as well.
++	 * Start the search from an arbitrary offset.
++	 */
++	err = mtd_find_rootfs_from(master, WRGG_MIN_ROOTFS_OFFS,
++				   master->size, &rootfs_offset, &type);
++	if (err)
++		return err;
++
++	parts = kzalloc(WRGG_NR_PARTS * sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	parts[0].name = KERNEL_PART_NAME;
++	parts[0].offset = 0;
++	parts[0].size = rootfs_offset;
++
++	parts[1].name = ROOTFS_PART_NAME;
++	parts[1].offset = rootfs_offset;
++	parts[1].size = master->size - rootfs_offset;
++
++	*pparts = parts;
++	return WRGG_NR_PARTS;
++}
++
++static const struct of_device_id mtdsplit_wrgg_of_match_table[] = {
++	{ .compatible = "wrg" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, mtdsplit_wrgg_of_match_table);
++
++static struct mtd_part_parser mtdsplit_wrgg_parser = {
++	.owner = THIS_MODULE,
++	.name = "wrgg-fw",
++	.of_match_table = mtdsplit_wrgg_of_match_table,
++	.parse_fn = mtdsplit_parse_wrgg,
++	.type = MTD_PARSER_TYPE_FIRMWARE,
++};
++
++static int __init mtdsplit_wrgg_init(void)
++{
++	register_mtd_parser(&mtdsplit_wrgg_parser);
++
++	return 0;
++}
++
++subsys_initcall(mtdsplit_wrgg_init);
+diff --git a/drivers/mtd/nand/raw/brcmnand/brcmnand.c b/drivers/mtd/nand/raw/brcmnand/brcmnand.c
+index 15ef30b368a5..4fef20724175 100644
+--- a/drivers/mtd/nand/raw/brcmnand/brcmnand.c
++++ b/drivers/mtd/nand/raw/brcmnand/brcmnand.c
+@@ -1019,11 +1019,14 @@ static int brcmnand_hamming_ooblayout_free(struct mtd_info *mtd, int section,
+ 		if (!section) {
+ 			/*
+ 			 * Small-page NAND use byte 6 for BBI while large-page
+-			 * NAND use byte 0.
++			 * NAND use bytes 0 and 1.
+ 			 */
+-			if (cfg->page_size > 512)
+-				oobregion->offset++;
+-			oobregion->length--;
++			if (cfg->page_size > 512) {
++				oobregion->offset += 2;
++				oobregion->length -= 2;
++			} else {
++				oobregion->length--;
++			}
+ 		}
+ 	}
+ 
+diff --git a/drivers/mtd/nand/raw/diskonchip.c b/drivers/mtd/nand/raw/diskonchip.c
+index c0e1a8ebe820..522390b99d3c 100644
+--- a/drivers/mtd/nand/raw/diskonchip.c
++++ b/drivers/mtd/nand/raw/diskonchip.c
+@@ -1609,13 +1609,10 @@ static int __init doc_probe(unsigned long physadr)
+ 		numchips = doc2001_init(mtd);
+ 
+ 	if ((ret = nand_scan(nand, numchips)) || (ret = doc->late_init(mtd))) {
+-		/* DBB note: i believe nand_release is necessary here, as
++		/* DBB note: i believe nand_cleanup is necessary here, as
+ 		   buffers may have been allocated in nand_base.  Check with
+ 		   Thomas. FIX ME! */
+-		/* nand_release will call mtd_device_unregister, but we
+-		   haven't yet added it.  This is handled without incident by
+-		   mtd_device_unregister, as far as I can tell. */
+-		nand_release(nand);
++		nand_cleanup(nand);
+ 		goto fail;
+ 	}
+ 
+diff --git a/drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c b/drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c
+index 49afebee50db..4b7c399d4f4b 100644
+--- a/drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c
++++ b/drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c
+@@ -376,7 +376,7 @@ static int ingenic_nand_init_chip(struct platform_device *pdev,
+ 
+ 	ret = mtd_device_register(mtd, NULL, 0);
+ 	if (ret) {
+-		nand_release(chip);
++		nand_cleanup(chip);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/mtd/nand/raw/mtk_nand.c b/drivers/mtd/nand/raw/mtk_nand.c
+index 373d47d1ba4c..08008c844a47 100644
+--- a/drivers/mtd/nand/raw/mtk_nand.c
++++ b/drivers/mtd/nand/raw/mtk_nand.c
+@@ -1419,7 +1419,7 @@ static int mtk_nfc_nand_chip_init(struct device *dev, struct mtk_nfc *nfc,
+ 	ret = mtd_device_register(mtd, NULL, 0);
+ 	if (ret) {
+ 		dev_err(dev, "mtd parse partition error\n");
+-		nand_release(nand);
++		nand_cleanup(nand);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/mtd/nand/raw/nand_base.c b/drivers/mtd/nand/raw/nand_base.c
+index f64e3b6605c6..db66c1be6e5f 100644
+--- a/drivers/mtd/nand/raw/nand_base.c
++++ b/drivers/mtd/nand/raw/nand_base.c
+@@ -731,8 +731,14 @@ EXPORT_SYMBOL_GPL(nand_soft_waitrdy);
+ int nand_gpio_waitrdy(struct nand_chip *chip, struct gpio_desc *gpiod,
+ 		      unsigned long timeout_ms)
+ {
+-	/* Wait until R/B pin indicates chip is ready or timeout occurs */
+-	timeout_ms = jiffies + msecs_to_jiffies(timeout_ms);
++
++	/*
++	 * Wait until R/B pin indicates chip is ready or timeout occurs.
++	 * +1 below is necessary because if we are now in the last fraction
++	 * of jiffy and msecs_to_jiffies is 1 then we will wait only that
++	 * small jiffy fraction - possibly leading to false timeout.
++	 */
++	timeout_ms = jiffies + msecs_to_jiffies(timeout_ms) + 1;
+ 	do {
+ 		if (gpiod_get_value_cansleep(gpiod))
+ 			return 0;
+@@ -5907,6 +5913,8 @@ void nand_cleanup(struct nand_chip *chip)
+ 	    chip->ecc.algo == NAND_ECC_BCH)
+ 		nand_bch_free((struct nand_bch_control *)chip->ecc.priv);
+ 
++	nanddev_cleanup(&chip->base);
++
+ 	/* Free bad block table memory */
+ 	kfree(chip->bbt);
+ 	kfree(chip->data_buf);
+diff --git a/drivers/mtd/nand/raw/nand_onfi.c b/drivers/mtd/nand/raw/nand_onfi.c
+index 0b879bd0a68c..8fe8d7bdd203 100644
+--- a/drivers/mtd/nand/raw/nand_onfi.c
++++ b/drivers/mtd/nand/raw/nand_onfi.c
+@@ -173,7 +173,7 @@ int nand_onfi_detect(struct nand_chip *chip)
+ 		}
+ 
+ 		if (onfi_crc16(ONFI_CRC_BASE, (u8 *)&p[i], 254) ==
+-				le16_to_cpu(p->crc)) {
++		    le16_to_cpu(p[i].crc)) {
+ 			if (i)
+ 				memcpy(p, &p[i], sizeof(*p));
+ 			break;
+diff --git a/drivers/mtd/nand/raw/orion_nand.c b/drivers/mtd/nand/raw/orion_nand.c
+index d27b39a7223c..a3dcdf25f5f2 100644
+--- a/drivers/mtd/nand/raw/orion_nand.c
++++ b/drivers/mtd/nand/raw/orion_nand.c
+@@ -180,7 +180,7 @@ static int __init orion_nand_probe(struct platform_device *pdev)
+ 	mtd->name = "orion_nand";
+ 	ret = mtd_device_register(mtd, board->parts, board->nr_parts);
+ 	if (ret) {
+-		nand_release(nc);
++		nand_cleanup(nc);
+ 		goto no_dev;
+ 	}
+ 
+diff --git a/drivers/mtd/nand/raw/oxnas_nand.c b/drivers/mtd/nand/raw/oxnas_nand.c
+index c43cb4d92d3d..0429d218fd9f 100644
+--- a/drivers/mtd/nand/raw/oxnas_nand.c
++++ b/drivers/mtd/nand/raw/oxnas_nand.c
+@@ -140,10 +140,8 @@ static int oxnas_nand_probe(struct platform_device *pdev)
+ 			goto err_release_child;
+ 
+ 		err = mtd_device_register(mtd, NULL, 0);
+-		if (err) {
+-			nand_release(chip);
+-			goto err_release_child;
+-		}
++		if (err)
++			goto err_cleanup_nand;
+ 
+ 		oxnas->chips[nchips] = chip;
+ 		++nchips;
+@@ -159,6 +157,8 @@ static int oxnas_nand_probe(struct platform_device *pdev)
+ 
+ 	return 0;
+ 
++err_cleanup_nand:
++	nand_cleanup(chip);
+ err_release_child:
+ 	of_node_put(nand_np);
+ err_clk_unprepare:
+diff --git a/drivers/mtd/nand/raw/pasemi_nand.c b/drivers/mtd/nand/raw/pasemi_nand.c
+index 9cfe7395172a..066ff6dc9a23 100644
+--- a/drivers/mtd/nand/raw/pasemi_nand.c
++++ b/drivers/mtd/nand/raw/pasemi_nand.c
+@@ -146,7 +146,7 @@ static int pasemi_nand_probe(struct platform_device *ofdev)
+ 	if (mtd_device_register(pasemi_nand_mtd, NULL, 0)) {
+ 		dev_err(dev, "Unable to register MTD device\n");
+ 		err = -ENODEV;
+-		goto out_lpc;
++		goto out_cleanup_nand;
+ 	}
+ 
+ 	dev_info(dev, "PA Semi NAND flash at %pR, control at I/O %x\n", &res,
+@@ -154,6 +154,8 @@ static int pasemi_nand_probe(struct platform_device *ofdev)
+ 
+ 	return 0;
+ 
++ out_cleanup_nand:
++	nand_cleanup(chip);
+  out_lpc:
+ 	release_region(lpcctl, 4);
+  out_ior:
+diff --git a/drivers/mtd/nand/raw/plat_nand.c b/drivers/mtd/nand/raw/plat_nand.c
+index dc0f3074ddbf..3a495b233443 100644
+--- a/drivers/mtd/nand/raw/plat_nand.c
++++ b/drivers/mtd/nand/raw/plat_nand.c
+@@ -92,7 +92,7 @@ static int plat_nand_probe(struct platform_device *pdev)
+ 	if (!err)
+ 		return err;
+ 
+-	nand_release(&data->chip);
++	nand_cleanup(&data->chip);
+ out:
+ 	if (pdata->ctrl.remove)
+ 		pdata->ctrl.remove(pdev);
+diff --git a/drivers/mtd/nand/raw/sharpsl.c b/drivers/mtd/nand/raw/sharpsl.c
+index b47a9eaff89b..d8c52a016080 100644
+--- a/drivers/mtd/nand/raw/sharpsl.c
++++ b/drivers/mtd/nand/raw/sharpsl.c
+@@ -183,7 +183,7 @@ static int sharpsl_nand_probe(struct platform_device *pdev)
+ 	return 0;
+ 
+ err_add:
+-	nand_release(this);
++	nand_cleanup(this);
+ 
+ err_scan:
+ 	iounmap(sharpsl->io);
+diff --git a/drivers/mtd/nand/raw/socrates_nand.c b/drivers/mtd/nand/raw/socrates_nand.c
+index 20f40c0e812c..7c94fc51a611 100644
+--- a/drivers/mtd/nand/raw/socrates_nand.c
++++ b/drivers/mtd/nand/raw/socrates_nand.c
+@@ -169,7 +169,7 @@ static int socrates_nand_probe(struct platform_device *ofdev)
+ 	if (!res)
+ 		return res;
+ 
+-	nand_release(nand_chip);
++	nand_cleanup(nand_chip);
+ 
+ out:
+ 	iounmap(host->io_base);
+diff --git a/drivers/mtd/nand/raw/sunxi_nand.c b/drivers/mtd/nand/raw/sunxi_nand.c
+index 89773293c64d..45c376fc571a 100644
+--- a/drivers/mtd/nand/raw/sunxi_nand.c
++++ b/drivers/mtd/nand/raw/sunxi_nand.c
+@@ -2003,7 +2003,7 @@ static int sunxi_nand_chip_init(struct device *dev, struct sunxi_nfc *nfc,
+ 	ret = mtd_device_register(mtd, NULL, 0);
+ 	if (ret) {
+ 		dev_err(dev, "failed to register mtd device: %d\n", ret);
+-		nand_release(nand);
++		nand_cleanup(nand);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/mtd/nand/raw/tmio_nand.c b/drivers/mtd/nand/raw/tmio_nand.c
+index db030f1701ee..4e9a6d94f6e8 100644
+--- a/drivers/mtd/nand/raw/tmio_nand.c
++++ b/drivers/mtd/nand/raw/tmio_nand.c
+@@ -448,7 +448,7 @@ static int tmio_probe(struct platform_device *dev)
+ 	if (!retval)
+ 		return retval;
+ 
+-	nand_release(nand_chip);
++	nand_cleanup(nand_chip);
+ 
+ err_irq:
+ 	tmio_hw_stop(dev, tmio);
+diff --git a/drivers/mtd/nand/raw/xway_nand.c b/drivers/mtd/nand/raw/xway_nand.c
+index 834f794816a9..018311dc8fe1 100644
+--- a/drivers/mtd/nand/raw/xway_nand.c
++++ b/drivers/mtd/nand/raw/xway_nand.c
+@@ -210,7 +210,7 @@ static int xway_nand_probe(struct platform_device *pdev)
+ 
+ 	err = mtd_device_register(mtd, NULL, 0);
+ 	if (err)
+-		nand_release(&data->chip);
++		nand_cleanup(&data->chip);
+ 
+ 	return err;
+ }
+diff --git a/drivers/mtd/nand/spi/core.c b/drivers/mtd/nand/spi/core.c
+index 5750c45019d8..0d21c68bfe24 100644
+--- a/drivers/mtd/nand/spi/core.c
++++ b/drivers/mtd/nand/spi/core.c
+@@ -609,6 +609,7 @@ static int spinand_markbad(struct nand_device *nand, const struct nand_pos *pos)
+ 		.ooboffs = 0,
+ 		.ooblen = sizeof(marker),
+ 		.oobbuf.out = marker,
++		.mode = MTD_OPS_RAW,
+ 	};
+ 	int ret;
+ 
+@@ -1048,6 +1049,10 @@ static int spinand_init(struct spinand_device *spinand)
+ 
+ 	mtd->oobavail = ret;
+ 
++	/* Propagate ECC information to mtd_info */
++	mtd->ecc_strength = nand->eccreq.strength;
++	mtd->ecc_step_size = nand->eccreq.step_size;
++
+ 	return 0;
+ 
+ err_cleanup_nanddev:
+diff --git a/drivers/mtd/parsers/Kconfig b/drivers/mtd/parsers/Kconfig
+index f98363c9b363..019cbd255559 100644
+--- a/drivers/mtd/parsers/Kconfig
++++ b/drivers/mtd/parsers/Kconfig
+@@ -57,6 +57,22 @@ config MTD_CMDLINE_PARTS
+ 
+ 	  If unsure, say 'N'.
+ 
++config MTD_MYLOADER_PARTS
++	tristate "MyLoader partition parsing"
++	depends on ADM5120 || ATH25 || ATH79
++	---help---
++	  MyLoader is a bootloader which allows the user to define partitions
++	  in flash devices, by putting a table in the second erase block
++	  on the device, similar to a partition table. This table gives the 
++	  offsets and lengths of the user defined partitions.
++
++	  If you need code which can detect and parse these tables, and
++	  register MTD 'partitions' corresponding to each image detected,
++	  enable this option.
++
++	  You will still need the parsing functions to be called by the driver
++	  for your particular device. It won't happen automatically.
++
+ config MTD_OF_PARTS
+ 	tristate "OpenFirmware (device tree) partitioning parser"
+ 	default y
+@@ -160,3 +176,12 @@ config MTD_REDBOOT_PARTS_READONLY
+ 	  'FIS directory' images, enable this option.
+ 
+ endif # MTD_REDBOOT_PARTS
++
++config MTD_ROUTERBOOT_PARTS
++	tristate "RouterBoot flash partition parser"
++	depends on MTD && OF
++	help
++	 MikroTik RouterBoot is implemented as a multi segment system on the
++	 flash, some of which are fixed and some of which are located at
++	 variable offsets. This parser handles both cases via properly
++	 formatted DTS.
+diff --git a/drivers/mtd/parsers/Makefile b/drivers/mtd/parsers/Makefile
+index b0c5f62f9e85..6249e69c55ec 100644
+--- a/drivers/mtd/parsers/Makefile
++++ b/drivers/mtd/parsers/Makefile
+@@ -3,9 +3,11 @@ obj-$(CONFIG_MTD_AR7_PARTS)		+= ar7part.o
+ obj-$(CONFIG_MTD_BCM47XX_PARTS)		+= bcm47xxpart.o
+ obj-$(CONFIG_MTD_BCM63XX_PARTS)		+= bcm63xxpart.o
+ obj-$(CONFIG_MTD_CMDLINE_PARTS)		+= cmdlinepart.o
++obj-$(CONFIG_MTD_MYLOADER_PARTS)		+= myloader.o
+ obj-$(CONFIG_MTD_OF_PARTS)		+= ofpart.o
+ obj-$(CONFIG_MTD_PARSER_IMAGETAG)	+= parser_imagetag.o
+ obj-$(CONFIG_MTD_AFS_PARTS)		+= afs.o
+ obj-$(CONFIG_MTD_PARSER_TRX)		+= parser_trx.o
+ obj-$(CONFIG_MTD_SHARPSL_PARTS)		+= sharpslpart.o
+ obj-$(CONFIG_MTD_REDBOOT_PARTS)		+= redboot.o
++obj-$(CONFIG_MTD_ROUTERBOOT_PARTS)		+= routerbootpart.o
+diff --git a/drivers/mtd/parsers/bcm47xxpart.c b/drivers/mtd/parsers/bcm47xxpart.c
+index 6012a10f10c8..978082e2f3c4 100644
+--- a/drivers/mtd/parsers/bcm47xxpart.c
++++ b/drivers/mtd/parsers/bcm47xxpart.c
+@@ -35,6 +35,7 @@
+ #define NVRAM_HEADER			0x48534C46	/* FLSH */
+ #define POT_MAGIC1			0x54544f50	/* POTT */
+ #define POT_MAGIC2			0x504f		/* OP */
++#define T_METER_MAGIC			0x4D540000	/* MT */
+ #define ML_MAGIC1			0x39685a42
+ #define ML_MAGIC2			0x26594131
+ #define TRX_MAGIC			0x30524448
+@@ -179,6 +180,15 @@ static int bcm47xxpart_parse(struct mtd_info *master,
+ 			continue;
+ 		}
+ 
++		/* T_Meter */
++		if ((le32_to_cpu(buf[0x000 / 4]) & 0xFFFF0000) == T_METER_MAGIC &&
++		    (le32_to_cpu(buf[0x030 / 4]) & 0xFFFF0000) == T_METER_MAGIC &&
++		    (le32_to_cpu(buf[0x060 / 4]) & 0xFFFF0000) == T_METER_MAGIC) {
++			bcm47xxpart_add_part(&parts[curr_part++], "T_Meter", offset,
++					     MTD_WRITEABLE);
++			continue;
++		}
++
+ 		/* TRX */
+ 		if (buf[0x000 / 4] == TRX_MAGIC) {
+ 			struct trx_header *trx;
+diff --git a/drivers/mtd/parsers/myloader.c b/drivers/mtd/parsers/myloader.c
+new file mode 100644
+index 000000000000..50ed8b197ed2
+--- /dev/null
++++ b/drivers/mtd/parsers/myloader.c
+@@ -0,0 +1,181 @@
++/*
++ *  Parse MyLoader-style flash partition tables and produce a Linux partition
++ *  array to match.
++ *
++ *  Copyright (C) 2007-2009 Gabor Juhos <juhosg@openwrt.org>
++ *
++ *  This file was based on drivers/mtd/redboot.c
++ *  Author: Red Hat, Inc. - David Woodhouse <dwmw2@cambridge.redhat.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/slab.h>
++#include <linux/init.h>
++#include <linux/vmalloc.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/byteorder/generic.h>
++#include <linux/myloader.h>
++
++#define BLOCK_LEN_MIN		0x10000
++#define PART_NAME_LEN		32
++
++struct part_data {
++	struct mylo_partition_table	tab;
++	char names[MYLO_MAX_PARTITIONS][PART_NAME_LEN];
++};
++
++static int myloader_parse_partitions(struct mtd_info *master,
++				     const struct mtd_partition **pparts,
++				     struct mtd_part_parser_data *data)
++{
++	struct part_data *buf;
++	struct mylo_partition_table *tab;
++	struct mylo_partition *part;
++	struct mtd_partition *mtd_parts;
++	struct mtd_partition *mtd_part;
++	int num_parts;
++	int ret, i;
++	size_t retlen;
++	char *names;
++	unsigned long offset;
++	unsigned long blocklen;
++
++	buf = vmalloc(sizeof(*buf));
++	if (!buf) {
++		return -ENOMEM;
++		goto out;
++	}
++	tab = &buf->tab;
++
++	blocklen = master->erasesize;
++	if (blocklen < BLOCK_LEN_MIN)
++		blocklen = BLOCK_LEN_MIN;
++
++	offset = blocklen;
++
++	/* Find the partition table */
++	for (i = 0; i < 4; i++, offset += blocklen) {
++		printk(KERN_DEBUG "%s: searching for MyLoader partition table"
++				" at offset 0x%lx\n", master->name, offset);
++
++		ret = mtd_read(master, offset, sizeof(*buf), &retlen,
++			       (void *)buf);
++		if (ret)
++			goto out_free_buf;
++
++		if (retlen != sizeof(*buf)) {
++			ret = -EIO;
++			goto out_free_buf;
++		}
++
++		/* Check for Partition Table magic number */
++		if (tab->magic == le32_to_cpu(MYLO_MAGIC_PARTITIONS))
++			break;
++
++	}
++
++	if (tab->magic != le32_to_cpu(MYLO_MAGIC_PARTITIONS)) {
++		printk(KERN_DEBUG "%s: no MyLoader partition table found\n",
++			master->name);
++		ret = 0;
++		goto out_free_buf;
++	}
++
++	/* The MyLoader and the Partition Table is always present */
++	num_parts = 2;
++
++	/* Detect number of used partitions */
++	for (i = 0; i < MYLO_MAX_PARTITIONS; i++) {
++		part = &tab->partitions[i];
++
++		if (le16_to_cpu(part->type) == PARTITION_TYPE_FREE)
++			continue;
++
++		num_parts++;
++	}
++
++	mtd_parts = kzalloc((num_parts * sizeof(*mtd_part) +
++				num_parts * PART_NAME_LEN), GFP_KERNEL);
++
++	if (!mtd_parts) {
++		ret = -ENOMEM;
++		goto out_free_buf;
++	}
++
++	mtd_part = mtd_parts;
++	names = (char *)&mtd_parts[num_parts];
++
++	strncpy(names, "myloader", PART_NAME_LEN);
++	mtd_part->name = names;
++	mtd_part->offset = 0;
++	mtd_part->size = offset;
++	mtd_part->mask_flags = MTD_WRITEABLE;
++	mtd_part++;
++	names += PART_NAME_LEN;
++
++	strncpy(names, "partition_table", PART_NAME_LEN);
++	mtd_part->name = names;
++	mtd_part->offset = offset;
++	mtd_part->size = blocklen;
++	mtd_part->mask_flags = MTD_WRITEABLE;
++	mtd_part++;
++	names += PART_NAME_LEN;
++
++	for (i = 0; i < MYLO_MAX_PARTITIONS; i++) {
++		part = &tab->partitions[i];
++
++		if (le16_to_cpu(part->type) == PARTITION_TYPE_FREE)
++			continue;
++
++		if ((buf->names[i][0]) && (buf->names[i][0] != '\xff'))
++			strncpy(names, buf->names[i], PART_NAME_LEN);
++		else
++			snprintf(names, PART_NAME_LEN, "partition%d", i);
++
++		mtd_part->offset = le32_to_cpu(part->addr);
++		mtd_part->size = le32_to_cpu(part->size);
++		mtd_part->name = names;
++		mtd_part++;
++		names += PART_NAME_LEN;
++	}
++
++	*pparts = mtd_parts;
++	ret = num_parts;
++
++ out_free_buf:
++	vfree(buf);
++ out:
++	return ret;
++}
++
++static struct mtd_part_parser myloader_mtd_parser = {
++	.owner		= THIS_MODULE,
++	.parse_fn	= myloader_parse_partitions,
++	.name		= "MyLoader",
++};
++
++static int __init myloader_mtd_parser_init(void)
++{
++	register_mtd_parser(&myloader_mtd_parser);
++
++	return 0;
++}
++
++static void __exit myloader_mtd_parser_exit(void)
++{
++	deregister_mtd_parser(&myloader_mtd_parser);
++}
++
++module_init(myloader_mtd_parser_init);
++module_exit(myloader_mtd_parser_exit);
++
++MODULE_AUTHOR("Gabor Juhos <juhosg@openwrt.org>");
++MODULE_DESCRIPTION("Parsing code for MyLoader partition tables");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mtd/parsers/parser_trx.c b/drivers/mtd/parsers/parser_trx.c
+index 8541182134d4..555d7c263e69 100644
+--- a/drivers/mtd/parsers/parser_trx.c
++++ b/drivers/mtd/parsers/parser_trx.c
+@@ -25,6 +25,33 @@ struct trx_header {
+ 	uint32_t offset[3];
+ } __packed;
+ 
++/*
++ * Calculate real end offset (address) for a given amount of data. It checks
++ * all blocks skipping bad ones.
++ */
++static size_t parser_trx_real_offset(struct mtd_info *mtd, size_t bytes)
++{
++	size_t real_offset = 0;
++
++	if (mtd_block_isbad(mtd, real_offset))
++		pr_warn("Base offset shouldn't be at bad block");
++
++	while (bytes >= mtd->erasesize) {
++		bytes -= mtd->erasesize;
++		real_offset += mtd->erasesize;
++		while (mtd_block_isbad(mtd, real_offset)) {
++			real_offset += mtd->erasesize;
++
++			if (real_offset >= mtd->size)
++				return real_offset - mtd->erasesize;
++		}
++	}
++
++	real_offset += bytes;
++
++	return real_offset;
++}
++
+ static const char *parser_trx_data_part_name(struct mtd_info *master,
+ 					     size_t offset)
+ {
+@@ -79,21 +106,21 @@ static int parser_trx_parse(struct mtd_info *mtd,
+ 	if (trx.offset[2]) {
+ 		part = &parts[curr_part++];
+ 		part->name = "loader";
+-		part->offset = trx.offset[i];
++		part->offset = parser_trx_real_offset(mtd, trx.offset[i]);
+ 		i++;
+ 	}
+ 
+ 	if (trx.offset[i]) {
+ 		part = &parts[curr_part++];
+ 		part->name = "linux";
+-		part->offset = trx.offset[i];
++		part->offset = parser_trx_real_offset(mtd, trx.offset[i]);
+ 		i++;
+ 	}
+ 
+ 	if (trx.offset[i]) {
+ 		part = &parts[curr_part++];
+-		part->name = parser_trx_data_part_name(mtd, trx.offset[i]);
+-		part->offset = trx.offset[i];
++		part->offset = parser_trx_real_offset(mtd, trx.offset[i]);
++		part->name = parser_trx_data_part_name(mtd, part->offset);
+ 		i++;
+ 	}
+ 
+diff --git a/drivers/mtd/parsers/redboot.c b/drivers/mtd/parsers/redboot.c
+index 91146bdc4713..b0152e71b347 100644
+--- a/drivers/mtd/parsers/redboot.c
++++ b/drivers/mtd/parsers/redboot.c
+@@ -274,14 +274,21 @@ static int parse_redboot_partitions(struct mtd_info *master,
+ #endif
+ 		names += strlen(names)+1;
+ 
+-#ifdef CONFIG_MTD_REDBOOT_PARTS_UNALLOCATED
+ 		if(fl->next && fl->img->flash_base + fl->img->size + master->erasesize <= fl->next->img->flash_base) {
+-			i++;
+-			parts[i].offset = parts[i-1].size + parts[i-1].offset;
+-			parts[i].size = fl->next->img->flash_base - parts[i].offset;
+-			parts[i].name = nullname;
+-		}
++			if (!strcmp(parts[i].name, "rootfs")) {
++				parts[i].size = fl->next->img->flash_base;
++				parts[i].size &= ~(master->erasesize - 1);
++				parts[i].size -= parts[i].offset;
++#ifdef CONFIG_MTD_REDBOOT_PARTS_UNALLOCATED
++				nrparts--;
++			} else {
++				i++;
++				parts[i].offset = parts[i-1].size + parts[i-1].offset;
++				parts[i].size = fl->next->img->flash_base - parts[i].offset;
++				parts[i].name = nullname;
+ #endif
++			}
++		}
+ 		tmp_fl = fl;
+ 		fl = fl->next;
+ 		kfree(tmp_fl);
+@@ -300,6 +307,7 @@ static int parse_redboot_partitions(struct mtd_info *master,
+ 
+ static const struct of_device_id mtd_parser_redboot_of_match_table[] = {
+ 	{ .compatible = "redboot-fis" },
++	{ .compatible = "ecoscentric,redboot-fis-partitions" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, mtd_parser_redboot_of_match_table);
+diff --git a/drivers/mtd/parsers/routerbootpart.c b/drivers/mtd/parsers/routerbootpart.c
+new file mode 100644
+index 000000000000..f9bba0f3ba15
+--- /dev/null
++++ b/drivers/mtd/parsers/routerbootpart.c
+@@ -0,0 +1,365 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Parser for MikroTik RouterBoot partitions.
++ *
++ * Copyright (C) 2020 Thibaut VARÈNE <hacks+kernel@slashdirt.org>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published
++ * by the Free Software Foundation.
++ *
++ * This parser builds from the "fixed-partitions" one (see ofpart.c), but it can
++ * handle dynamic partitions as found on routerboot devices.
++ *
++ * DTS nodes are defined as follows:
++ * For fixed partitions:
++ *	node-name@unit-address {
++ *		reg = <prop-encoded-array>;
++ *		label = <string>;
++ *		read-only;
++ *		lock;
++ *	};
++ *
++ * reg property is mandatory; other properties are optional.
++ * reg format is <address length>. length can be 0 if the next partition is
++ * another fixed partition or a "well-known" partition as defined below: in that
++ * case the partition will extend up to the next one.
++ *
++ * For dynamic partitions:
++ *	node-name {
++ *		size = <prop-encoded-array>;
++ *		label = <string>;
++ *		read-only;
++ *		lock;
++ *	};
++ *
++ * size property is normally mandatory. It can only be omitted (or set to 0) if:
++ *	- the partition is a "well-known" one (as defined below), in which case
++ *	  the partition size will be automatically adjusted; or
++ *	- the next partition is a fixed one or a "well-known" one, in which case
++ *	  the current partition will extend up to the next one.
++ * Other properties are optional.
++ * size format is <length>.
++ * By default dynamic partitions are appended after the preceding one, except
++ * for "well-known" ones which are automatically located on flash.
++ *
++ * Well-known partitions (matched via label or node-name):
++ * - "hard_config"
++ * - "soft_config"
++ * - "dtb_config"
++ *
++ * Note: this parser will happily register 0-sized partitions if misused.
++ *
++ * This parser requires the DTS to list partitions in ascending order as
++ * expected on the MTD device.
++ *
++ * Since only the "hard_config" and "soft_config" partitions are used in OpenWRT,
++ * a minimal working DTS could define only these two partitions dynamically (in
++ * the right order, usually hard_config then soft_config).
++ *
++ * Note: some mips RB devices encode the hard_config offset and length in two
++ * consecutive u32 located at offset 0x14 (for ramips) or 0x24 (for ath79) on
++ * the SPI NOR flash. Unfortunately this seems inconsistent across machines and
++ * does not apply to e.g. ipq-based ones, so we ignore that information.
++ *
++ * Note: To find well-known partitions, this parser will go through the entire
++ * top mtd partition parsed, _before_ the DTS nodes are processed. This works
++ * well in the current state of affairs, and is a simpler implementation than
++ * searching for known partitions in the "holes" left between fixed-partition,
++ * _after_ processing DTS nodes.
++ */
++
++#include <linux/module.h>
++#include <linux/slab.h>
++#include <linux/mtd/mtd.h>
++#include <linux/mtd/partitions.h>
++#include <linux/of.h>
++#include <linux/of_fdt.h>
++#include <linux/libfdt_env.h>
++#include <linux/string.h>
++
++#define RB_MAGIC_HARD	(('H') | ('a' << 8) | ('r' << 16) | ('d' << 24))
++#define RB_MAGIC_SOFT	(('S') | ('o' << 8) | ('f' << 16) | ('t' << 24))
++#define RB_BLOCK_SIZE	0x1000
++
++struct routerboot_dynpart {
++	const char * const name;
++	const u32 magic;
++	int (* const size_fixup)(struct mtd_info *, struct routerboot_dynpart *);
++	size_t offset;
++	size_t size;
++	bool found;
++};
++
++static int routerboot_dtbsfixup(struct mtd_info *, struct routerboot_dynpart *);
++
++static struct routerboot_dynpart rb_dynparts[] = {
++	{
++		.name = "hard_config",
++		.magic = RB_MAGIC_HARD,	// stored in CPU-endianness on flash
++		.size_fixup = NULL,
++		.offset = 0x0,
++		.size = RB_BLOCK_SIZE,
++		.found = false,
++	}, {
++		.name = "soft_config",
++		.magic = RB_MAGIC_SOFT,	// stored in CPU-endianness on flash
++		.size_fixup = NULL,
++		.offset = 0x0,
++		.size = RB_BLOCK_SIZE,
++		.found = false,
++	}, {
++		.name = "dtb_config",
++		.magic = fdt32_to_cpu(OF_DT_HEADER),	// stored BE on flash
++		.size_fixup = routerboot_dtbsfixup,
++		.offset = 0x0,
++		.size = 0x0,
++		.found = false,
++	}
++};
++
++static int routerboot_dtbsfixup(struct mtd_info *master, struct routerboot_dynpart *rbdpart)
++{
++	int err;
++	size_t bytes_read, psize;
++	struct {
++		fdt32_t magic;
++		fdt32_t totalsize;
++		fdt32_t off_dt_struct;
++		fdt32_t off_dt_strings;
++		fdt32_t off_mem_rsvmap;
++		fdt32_t version;
++		fdt32_t last_comp_version;
++		fdt32_t boot_cpuid_phys;
++		fdt32_t size_dt_strings;
++		fdt32_t size_dt_struct;
++	} fdt_header;
++
++	err = mtd_read(master, rbdpart->offset, sizeof(fdt_header),
++		       &bytes_read, (u8 *)&fdt_header);
++	if (err)
++		return err;
++
++	if (bytes_read != sizeof(fdt_header))
++		return -EIO;
++
++	psize = fdt32_to_cpu(fdt_header.totalsize);
++	if (!psize)
++		return -EINVAL;
++
++	rbdpart->size = psize;
++	return 0;
++}
++
++static void routerboot_find_dynparts(struct mtd_info *master)
++{
++	size_t bytes_read, offset;
++	bool allfound;
++	int err, i;
++	u32 buf;
++
++	/*
++	 * Dynamic RouterBoot partitions offsets are aligned to RB_BLOCK_SIZE:
++	 * read the whole partition at RB_BLOCK_SIZE intervals to find sigs.
++	 * Skip partition content when possible.
++	 */
++	offset = 0;
++	while (offset < master->size) {
++		err = mtd_read(master, offset, sizeof(buf), &bytes_read, (u8 *)&buf);
++		if (err) {
++			pr_err("%s: mtd_read error while parsing (offset: 0x%X): %d\n",
++			       master->name, offset, err);
++			continue;
++		}
++
++		allfound = true;
++
++		for (i = 0; i < ARRAY_SIZE(rb_dynparts); i++) {
++			if (rb_dynparts[i].found)
++				continue;
++
++			allfound = false;
++
++			if (rb_dynparts[i].magic == buf) {
++				rb_dynparts[i].offset = offset;
++
++				if (rb_dynparts[i].size_fixup) {
++					err = rb_dynparts[i].size_fixup(master, &rb_dynparts[i]);
++					if (err) {
++						pr_err("%s: size fixup error while parsing \"%s\": %d\n",
++						       master->name, rb_dynparts[i].name, err);
++						continue;
++					}
++				}
++
++				rb_dynparts[i].found = true;
++
++				/*
++				 * move offset to skip the whole partition on
++				 * next iteration if size > RB_BLOCK_SIZE.
++				 */
++				if (rb_dynparts[i].size > RB_BLOCK_SIZE)
++					offset += ALIGN_DOWN((rb_dynparts[i].size - RB_BLOCK_SIZE), RB_BLOCK_SIZE);
++
++				break;
++			}
++		}
++
++		offset += RB_BLOCK_SIZE;
++
++		if (allfound)
++			break;
++	}
++}
++
++static int routerboot_partitions_parse(struct mtd_info *master,
++				       const struct mtd_partition **pparts,
++				       struct mtd_part_parser_data *data)
++{
++	struct device_node *rbpart_node, *pp;
++	struct mtd_partition *parts;
++	const char *partname;
++	size_t master_ofs;
++	int np;
++
++	/* Pull of_node from the master device node */
++	rbpart_node = mtd_get_of_node(master);
++	if (!rbpart_node)
++		return 0;
++
++	/* First count the subnodes */
++	np = 0;
++	for_each_child_of_node(rbpart_node,  pp)
++		np++;
++
++	if (!np)
++		return 0;
++
++	parts = kcalloc(np, sizeof(*parts), GFP_KERNEL);
++	if (!parts)
++		return -ENOMEM;
++
++	/* Preemptively look for known parts in flash */
++	routerboot_find_dynparts(master);
++
++	np = 0;
++	master_ofs = 0;
++	for_each_child_of_node(rbpart_node, pp) {
++		const __be32 *reg, *sz;
++		size_t offset, size;
++		int i, len, a_cells, s_cells;
++
++		partname = of_get_property(pp, "label", &len);
++		/* Allow deprecated use of "name" instead of "label" */
++		if (!partname)
++			partname = of_get_property(pp, "name", &len);
++		/* Fallback to node name per spec if all else fails: partname is always set */
++		if (!partname)
++			partname = pp->name;
++		parts[np].name = partname;
++
++		reg = of_get_property(pp, "reg", &len);
++		if (reg) {
++			/* Fixed partition */
++			a_cells = of_n_addr_cells(pp);
++			s_cells = of_n_size_cells(pp);
++
++			if ((len / 4) != (a_cells + s_cells)) {
++				pr_debug("%s: routerboot partition %pOF (%pOF) error parsing reg property.\n",
++					 master->name, pp, rbpart_node);
++				goto rbpart_fail;
++			}
++
++			offset = of_read_number(reg, a_cells);
++			size = of_read_number(reg + a_cells, s_cells);
++		} else {
++			/* Dynamic partition */
++			/* Default: part starts at current offset, 0 size */
++			offset = master_ofs;
++			size = 0;
++
++			/* Check if well-known partition */
++			for (i = 0; i < ARRAY_SIZE(rb_dynparts); i++) {
++				if (!strcmp(partname, rb_dynparts[i].name) && rb_dynparts[i].found) {
++					offset = rb_dynparts[i].offset;
++					size = rb_dynparts[i].size;
++					break;
++				}
++			}
++
++			/* Standalone 'size' property? Override size */
++			sz = of_get_property(pp, "size", &len);
++			if (sz) {
++				s_cells = of_n_size_cells(pp);
++				if ((len / 4) != s_cells) {
++					pr_debug("%s: routerboot partition %pOF (%pOF) error parsing size property.\n",
++						 master->name, pp, rbpart_node);
++					goto rbpart_fail;
++				}
++
++				size = of_read_number(sz, s_cells);
++			}
++		}
++
++		if (np > 0) {
++			/* Minor sanity check for overlaps */
++			if (offset < (parts[np-1].offset + parts[np-1].size)) {
++				pr_err("%s: routerboot partition %pOF (%pOF) \"%s\" overlaps with previous partition \"%s\".\n",
++				       master->name, pp, rbpart_node,
++				       partname, parts[np-1].name);
++				goto rbpart_fail;
++			}
++
++			/* Fixup end of previous partition if necessary */
++			if (!parts[np-1].size)
++				parts[np-1].size = (offset - parts[np-1].offset);
++		}
++
++		if ((offset + size) > master->size) {
++			pr_err("%s: routerboot partition %pOF (%pOF) \"%s\" extends past end of segment.\n",
++			       master->name, pp, rbpart_node, partname);
++			goto rbpart_fail;
++		}
++
++		parts[np].offset = offset;
++		parts[np].size = size;
++		parts[np].of_node = pp;
++
++		if (of_get_property(pp, "read-only", &len))
++			parts[np].mask_flags |= MTD_WRITEABLE;
++
++		if (of_get_property(pp, "lock", &len))
++			parts[np].mask_flags |= MTD_POWERUP_LOCK;
++
++		/* Keep master offset aligned to RB_BLOCK_SIZE */
++		master_ofs = ALIGN(offset + size, RB_BLOCK_SIZE);
++		np++;
++	}
++
++	*pparts = parts;
++	return np;
++
++rbpart_fail:
++	pr_err("%s: error parsing routerboot partition %pOF (%pOF)\n",
++	       master->name, pp, rbpart_node);
++	of_node_put(pp);
++	kfree(parts);
++	return -EINVAL;
++}
++
++static const struct of_device_id parse_routerbootpart_match_table[] = {
++	{ .compatible = "mikrotik,routerboot-partitions" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, parse_routerbootpart_match_table);
++
++static struct mtd_part_parser routerbootpart_parser = {
++	.parse_fn = routerboot_partitions_parse,
++	.name = "routerbootpart",
++	.of_match_table = parse_routerbootpart_match_table,
++};
++module_mtd_part_parser(routerbootpart_parser);
++
++MODULE_LICENSE("GPL v2");
++MODULE_DESCRIPTION("MTD partitioning for RouterBoot");
++MODULE_AUTHOR("Thibaut VARENE");
+diff --git a/drivers/mtd/spi-nor/Kconfig b/drivers/mtd/spi-nor/Kconfig
+index f237fcdf7f86..63568fc2498a 100644
+--- a/drivers/mtd/spi-nor/Kconfig
++++ b/drivers/mtd/spi-nor/Kconfig
+@@ -34,6 +34,17 @@ config SPI_ASPEED_SMC
+ 	  and support for the SPI flash memory controller (SPI) for
+ 	  the host firmware. The implementation only supports SPI NOR.
+ 
++config MTD_SPI_NOR_USE_4K_SECTORS_LIMIT
++	int "Maximum flash chip size to use 4K sectors on (in KiB)"
++	depends on MTD_SPI_NOR_USE_4K_SECTORS
++	default "4096"
++	help
++	  There are many flash chips that support 4K sectors, but are so large
++	  that using them significantly slows down writing large amounts of
++	  data or using a writable filesystem.
++	  Any flash chip larger than the size specified in this option will
++	  not use 4K sectors.
++
+ config SPI_CADENCE_QUADSPI
+ 	tristate "Cadence Quad SPI controller"
+ 	depends on OF && (ARM || ARM64 || COMPILE_TEST)
+diff --git a/drivers/mtd/spi-nor/spi-nor.c b/drivers/mtd/spi-nor/spi-nor.c
+index f96fa9bf4a12..911e61164e9e 100644
+--- a/drivers/mtd/spi-nor/spi-nor.c
++++ b/drivers/mtd/spi-nor/spi-nor.c
+@@ -616,6 +616,22 @@ static void spi_nor_set_4byte_opcodes(struct spi_nor *nor)
+ 	}
+ }
+ 
++static int spi_nor_check_set_addr_width(struct spi_nor *nor, loff_t addr)
++{
++	u8 addr_width;
++
++	if ((nor->flags & (SNOR_F_4B_OPCODES | SNOR_F_BROKEN_RESET)) !=
++	    SNOR_F_BROKEN_RESET)
++		return 0;
++
++	addr_width = addr & 0xff000000 ? 4 : 3;
++	if (nor->addr_width == addr_width)
++		return 0;
++
++	nor->addr_width = addr_width;
++	return nor->params.set_4byte(nor, addr_width == 4);
++}
++
+ static int macronix_set_4byte(struct spi_nor *nor, bool enable)
+ {
+ 	if (nor->spimem) {
+@@ -1259,6 +1275,10 @@ static int spi_nor_erase(struct mtd_info *mtd, struct erase_info *instr)
+ 	if (ret)
+ 		return ret;
+ 
++	ret = spi_nor_check_set_addr_width(nor, instr->addr + instr->len);
++	if (ret < 0)
++		return ret;
++
+ 	/* whole-chip erase? */
+ 	if (len == mtd->size && !(nor->flags & SNOR_F_NO_OP_CHIP_ERASE)) {
+ 		unsigned long timeout;
+@@ -1315,6 +1335,7 @@ static int spi_nor_erase(struct mtd_info *mtd, struct erase_info *instr)
+ 	write_disable(nor);
+ 
+ erase_err:
++	spi_nor_check_set_addr_width(nor, 0);
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_ERASE);
+ 
+ 	return ret;
+@@ -1621,7 +1642,9 @@ static int spi_nor_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+ 	if (ret)
+ 		return ret;
+ 
++	spi_nor_check_set_addr_width(nor, ofs + len);
+ 	ret = nor->params.locking_ops->lock(nor, ofs, len);
++	spi_nor_check_set_addr_width(nor, 0);
+ 
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_UNLOCK);
+ 	return ret;
+@@ -1636,7 +1659,9 @@ static int spi_nor_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+ 	if (ret)
+ 		return ret;
+ 
++	spi_nor_check_set_addr_width(nor, ofs + len);
+ 	ret = nor->params.locking_ops->unlock(nor, ofs, len);
++	spi_nor_check_set_addr_width(nor, 0);
+ 
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_LOCK);
+ 	return ret;
+@@ -1651,7 +1676,9 @@ static int spi_nor_is_locked(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+ 	if (ret)
+ 		return ret;
+ 
++	spi_nor_check_set_addr_width(nor, ofs + len);
+ 	ret = nor->params.locking_ops->is_locked(nor, ofs, len);
++	spi_nor_check_set_addr_width(nor, 0);
+ 
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_LOCK);
+ 	return ret;
+@@ -2143,6 +2170,32 @@ static struct spi_nor_fixups gd25q256_fixups = {
+ 	.default_init = gd25q256_default_init,
+ };
+ 
++static int
++w25q256_post_bfpt_fixups(struct spi_nor *nor,
++			 const struct sfdp_parameter_header *bfpt_header,
++			 const struct sfdp_bfpt *bfpt,
++			 struct spi_nor_flash_parameter *params)
++{
++	/*
++	 * W25Q256JV supports 4B opcodes but W25Q256FV does not.
++	 * Unfortunately, Winbond has re-used the same JEDEC ID for both
++	 * variants which prevents us from defining a new entry in the parts
++	 * table.
++	 * To differentiate between W25Q256JV and W25Q256FV check SFDP header
++	 * version: only JV has JESD216A compliant structure (version 5)
++	 */
++
++	if (bfpt_header->major == SFDP_JESD216_MAJOR &&
++	    bfpt_header->minor == SFDP_JESD216A_MINOR)
++		nor->flags |= SNOR_F_4B_OPCODES;
++
++	return 0;
++}
++
++static struct spi_nor_fixups w25q256_fixups = {
++	.post_bfpt = w25q256_post_bfpt_fixups,
++};
++
+ /* NOTE: double check command sets and memory organization when you add
+  * more nor chips.  This current list focusses on newer chips, which
+  * have been converging on command sets which including JEDEC ID.
+@@ -2177,6 +2230,7 @@ static const struct flash_info spi_nor_ids[] = {
+ 	{ "en25q32b",   INFO(0x1c3016, 0, 64 * 1024,   64, 0) },
+ 	{ "en25p64",    INFO(0x1c2017, 0, 64 * 1024,  128, 0) },
+ 	{ "en25q64",    INFO(0x1c3017, 0, 64 * 1024,  128, SECT_4K) },
++	{ "en25q128",   INFO(0x1c3018, 0, 64 * 1024,  256, SECT_4K) },
+ 	{ "en25q80a",   INFO(0x1c3014, 0, 64 * 1024,   16,
+ 			SECT_4K | SPI_NOR_DUAL_READ) },
+ 	{ "en25qh32",   INFO(0x1c7016, 0, 64 * 1024,   64, 0) },
+@@ -2201,6 +2255,11 @@ static const struct flash_info spi_nor_ids[] = {
+ 	{ "mb85rs1mt", INFO(0x047f27, 0, 128 * 1024, 1, SPI_NOR_NO_ERASE) },
+ 
+ 	/* GigaDevice */
++	{
++		"gd25d05", INFO(0xc84010, 0, 64 * 1024,  1,
++			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
++			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
++	},
+ 	{
+ 		"gd25q16", INFO(0xc84015, 0, 64 * 1024,  32,
+ 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
+@@ -2485,7 +2544,8 @@ static const struct flash_info spi_nor_ids[] = {
+ 	{ "w25q80", INFO(0xef5014, 0, 64 * 1024,  16, SECT_4K) },
+ 	{ "w25q80bl", INFO(0xef4014, 0, 64 * 1024,  16, SECT_4K) },
+ 	{ "w25q128", INFO(0xef4018, 0, 64 * 1024, 256, SECT_4K) },
+-	{ "w25q256", INFO(0xef4019, 0, 64 * 1024, 512, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
++	{ "w25q256", INFO(0xef4019, 0, 64 * 1024, 512, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ)
++			  .fixups = &w25q256_fixups },
+ 	{ "w25q256jvm", INFO(0xef7019, 0, 64 * 1024, 512,
+ 			     SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+ 	{ "w25m512jv", INFO(0xef7119, 0, 64 * 1024, 1024,
+@@ -2508,6 +2568,9 @@ static const struct flash_info spi_nor_ids[] = {
+ 	/* XMC (Wuhan Xinxin Semiconductor Manufacturing Corp.) */
+ 	{ "XM25QH64A", INFO(0x207017, 0, 64 * 1024, 128, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+ 	{ "XM25QH128A", INFO(0x207018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
++
++	/* XTX Technology (Shenzhen) Limited */
++	{ "xt25f128b", INFO(0x0B4018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+ 	{ },
+ };
+ 
+@@ -2558,6 +2621,10 @@ static int spi_nor_read(struct mtd_info *mtd, loff_t from, size_t len,
+ 	if (ret)
+ 		return ret;
+ 
++	ret = spi_nor_check_set_addr_width(nor, from + len);
++	if (ret < 0)
++		return ret;
++
+ 	while (len) {
+ 		loff_t addr = from;
+ 
+@@ -2581,6 +2648,7 @@ static int spi_nor_read(struct mtd_info *mtd, loff_t from, size_t len,
+ 	ret = 0;
+ 
+ read_err:
++	spi_nor_check_set_addr_width(nor, 0);
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_READ);
+ 	return ret;
+ }
+@@ -2598,6 +2666,10 @@ static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
+ 	if (ret)
+ 		return ret;
+ 
++	ret = spi_nor_check_set_addr_width(nor, to + len);
++	if (ret < 0)
++		return ret;
++
+ 	write_enable(nor);
+ 
+ 	nor->sst_write_second = false;
+@@ -2660,6 +2732,7 @@ static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
+ 	}
+ sst_write_err:
+ 	*retlen += actual;
++	spi_nor_check_set_addr_width(nor, 0);
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_WRITE);
+ 	return ret;
+ }
+@@ -2682,6 +2755,10 @@ static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
+ 	if (ret)
+ 		return ret;
+ 
++	ret = spi_nor_check_set_addr_width(nor, to + len);
++	if (ret < 0)
++		return ret;
++
+ 	for (i = 0; i < len; ) {
+ 		ssize_t written;
+ 		loff_t addr = to + i;
+@@ -2709,7 +2786,7 @@ static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
+ 
+ 		write_enable(nor);
+ 		ret = spi_nor_write_data(nor, addr, page_remain, buf + i);
+-		if (ret < 0)
++		if (ret <= 0)
+ 			goto write_err;
+ 		written = ret;
+ 
+@@ -2721,6 +2798,7 @@ static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
+ 	}
+ 
+ write_err:
++	spi_nor_check_set_addr_width(nor, 0);
+ 	spi_nor_unlock_and_unprep(nor, SPI_NOR_OPS_WRITE);
+ 	return ret;
+ }
+@@ -4402,6 +4480,7 @@ static void st_micron_set_default_init(struct spi_nor *nor)
+ 
+ static void winbond_set_default_init(struct spi_nor *nor)
+ {
++	nor->flags |= SNOR_F_HAS_LOCK;
+ 	nor->params.set_4byte = winbond_set_4byte;
+ }
+ 
+@@ -4468,6 +4547,7 @@ static void spi_nor_info_init_params(struct spi_nor *nor)
+ 	struct spi_nor_erase_map *map = &params->erase_map;
+ 	const struct flash_info *info = nor->info;
+ 	struct device_node *np = spi_nor_get_flash_node(nor);
++	struct mtd_info *mtd = &nor->mtd;
+ 	u8 i, erase_mask;
+ 
+ 	/* Initialize legacy flash parameters and settings. */
+@@ -4531,6 +4611,21 @@ static void spi_nor_info_init_params(struct spi_nor *nor)
+ 	 */
+ 	erase_mask = 0;
+ 	i = 0;
++#ifdef CONFIG_MTD_SPI_NOR_USE_4K_SECTORS
++	if ((info->flags & SECT_4K_PMC) && (mtd->size <=
++		   CONFIG_MTD_SPI_NOR_USE_4K_SECTORS_LIMIT * 1024)) {
++		erase_mask |= BIT(i);
++		spi_nor_set_erase_type(&map->erase_type[i], 4096u,
++				       SPINOR_OP_BE_4K_PMC);
++		i++;
++	} else if ((info->flags & SECT_4K) && (mtd->size <=
++	    CONFIG_MTD_SPI_NOR_USE_4K_SECTORS_LIMIT * 1024)) {
++		erase_mask |= BIT(i);
++		spi_nor_set_erase_type(&map->erase_type[i], 4096u,
++				       SPINOR_OP_BE_4K);
++		i++;
++	}
++#else
+ 	if (info->flags & SECT_4K_PMC) {
+ 		erase_mask |= BIT(i);
+ 		spi_nor_set_erase_type(&map->erase_type[i], 4096u,
+@@ -4542,6 +4637,7 @@ static void spi_nor_info_init_params(struct spi_nor *nor)
+ 				       SPINOR_OP_BE_4K);
+ 		i++;
+ 	}
++#endif
+ 	erase_mask |= BIT(i);
+ 	spi_nor_set_erase_type(&map->erase_type[i], info->sector_size,
+ 			       SPINOR_OP_SE);
+@@ -4709,9 +4805,13 @@ static int spi_nor_init(struct spi_nor *nor)
+ 		 * reboots (e.g., crashes). Warn the user (or hopefully, system
+ 		 * designer) that this is bad.
+ 		 */
+-		WARN_ONCE(nor->flags & SNOR_F_BROKEN_RESET,
+-			  "enabling reset hack; may not recover from unexpected reboots\n");
+-		nor->params.set_4byte(nor, true);
++		if (nor->flags & SNOR_F_BROKEN_RESET) {
++			dev_warn(nor->dev,
++				"enabling reset hack; may not recover from unexpected reboots\n");
++			nor->addr_width = 3;
++		} else {
++			nor->params.set_4byte(nor, true);
++		}
+ 	}
+ 
+ 	return 0;
+@@ -4889,7 +4989,9 @@ int spi_nor_scan(struct spi_nor *nor, const char *name,
+ 	 */
+ 	if (JEDEC_MFR(nor->info) == SNOR_MFR_ATMEL ||
+ 	    JEDEC_MFR(nor->info) == SNOR_MFR_INTEL ||
++	    JEDEC_MFR(nor->info) == SNOR_MFR_MACRONIX ||
+ 	    JEDEC_MFR(nor->info) == SNOR_MFR_SST ||
++	    JEDEC_MFR(nor->info) == SNOR_MFR_WINBOND ||
+ 	    nor->info->flags & SPI_NOR_HAS_LOCK)
+ 		nor->clear_sr_bp = spi_nor_clear_sr_bp;
+ 
+diff --git a/drivers/mtd/ubi/attach.c b/drivers/mtd/ubi/attach.c
+index 10b2459f8951..0c5f5514e629 100644
+--- a/drivers/mtd/ubi/attach.c
++++ b/drivers/mtd/ubi/attach.c
+@@ -926,6 +926,13 @@ static bool vol_ignored(int vol_id)
+ #endif
+ }
+ 
++static bool ec_hdr_has_eof(struct ubi_ec_hdr *ech)
++{
++	return ech->padding1[0] == 'E' &&
++	       ech->padding1[1] == 'O' &&
++	       ech->padding1[2] == 'F';
++}
++
+ /**
+  * scan_peb - scan and process UBI headers of a PEB.
+  * @ubi: UBI device description object
+@@ -958,9 +965,21 @@ static int scan_peb(struct ubi_device *ubi, struct ubi_attach_info *ai,
+ 		return 0;
+ 	}
+ 
+-	err = ubi_io_read_ec_hdr(ubi, pnum, ech, 0);
+-	if (err < 0)
+-		return err;
++	if (!ai->eof_found) {
++		err = ubi_io_read_ec_hdr(ubi, pnum, ech, 0);
++		if (err < 0)
++			return err;
++
++		if (ec_hdr_has_eof(ech)) {
++			pr_notice("UBI: EOF marker found, PEBs from %d will be erased\n",
++				pnum);
++			ai->eof_found = true;
++		}
++	}
++
++	if (ai->eof_found)
++		err = UBI_IO_FF_BITFLIPS;
++
+ 	switch (err) {
+ 	case 0:
+ 		break;
+diff --git a/drivers/mtd/ubi/block.c b/drivers/mtd/ubi/block.c
+index e1a2ae21dfd3..873f9cb24b8f 100644
+--- a/drivers/mtd/ubi/block.c
++++ b/drivers/mtd/ubi/block.c
+@@ -42,6 +42,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/idr.h>
+ #include <asm/div64.h>
++#include <linux/root_dev.h>
+ 
+ #include "ubi-media.h"
+ #include "ubi.h"
+@@ -458,6 +459,15 @@ int ubiblock_create(struct ubi_volume_info *vi)
+ 	dev_info(disk_to_dev(dev->gd), "created from ubi%d:%d(%s)",
+ 		 dev->ubi_num, dev->vol_id, vi->name);
+ 	mutex_unlock(&devices_mutex);
++
++	if (!strcmp(vi->name, "rootfs") &&
++	    IS_ENABLED(CONFIG_MTD_ROOTFS_ROOT_DEV) &&
++	    ROOT_DEV == 0) {
++		pr_notice("ubiblock: device ubiblock%d_%d (%s) set to be root filesystem\n",
++			  dev->ubi_num, dev->vol_id, vi->name);
++		ROOT_DEV = MKDEV(gd->major, gd->first_minor);
++	}
++
+ 	return 0;
+ 
+ out_free_queue:
+@@ -652,6 +662,44 @@ static void __init ubiblock_create_from_param(void)
+ 	}
+ }
+ 
++#define UBIFS_NODE_MAGIC  0x06101831
++static inline int ubi_vol_is_ubifs(struct ubi_volume_desc *desc)
++{
++	int ret;
++	uint32_t magic_of, magic;
++	ret = ubi_read(desc, 0, (char *)&magic_of, 0, 4);
++	if (ret)
++		return 0;
++	magic = le32_to_cpu(magic_of);
++	return magic == UBIFS_NODE_MAGIC;
++}
++
++static void __init ubiblock_create_auto_rootfs(void)
++{
++	int ubi_num, ret, is_ubifs;
++	struct ubi_volume_desc *desc;
++	struct ubi_volume_info vi;
++
++	for (ubi_num = 0; ubi_num < UBI_MAX_DEVICES; ubi_num++) {
++		desc = ubi_open_volume_nm(ubi_num, "rootfs", UBI_READONLY);
++		if (IS_ERR(desc))
++			continue;
++
++		ubi_get_volume_info(desc, &vi);
++		is_ubifs = ubi_vol_is_ubifs(desc);
++		ubi_close_volume(desc);
++		if (is_ubifs)
++			break;
++
++		ret = ubiblock_create(&vi);
++		if (ret)
++			pr_err("UBI error: block: can't add '%s' volume, err=%d\n",
++				vi.name, ret);
++		/* always break if we get here */
++		break;
++	}
++}
++
+ static void ubiblock_remove_all(void)
+ {
+ 	struct ubiblock *next;
+@@ -684,6 +732,10 @@ int __init ubiblock_init(void)
+ 	 */
+ 	ubiblock_create_from_param();
+ 
++	/* auto-attach "rootfs" volume if existing and non-ubifs */
++	if (IS_ENABLED(CONFIG_MTD_ROOTFS_ROOT_DEV))
++		ubiblock_create_auto_rootfs();
++
+ 	/*
+ 	 * Block devices are only created upon user requests, so we ignore
+ 	 * existing volumes.
+diff --git a/drivers/mtd/ubi/build.c b/drivers/mtd/ubi/build.c
+index d636bbe214cb..d9446e68b394 100644
+--- a/drivers/mtd/ubi/build.c
++++ b/drivers/mtd/ubi/build.c
+@@ -1168,6 +1168,73 @@ static struct mtd_info * __init open_mtd_device(const char *mtd_dev)
+ 	return mtd;
+ }
+ 
++/*
++ * This function tries attaching mtd partitions named either "ubi" or "data"
++ * during boot.
++ */
++static void __init ubi_auto_attach(void)
++{
++	int err;
++	struct mtd_info *mtd;
++	loff_t offset = 0;
++	size_t len;
++	char magic[4];
++
++	/* try attaching mtd device named "ubi" or "data" */
++	mtd = open_mtd_device("ubi");
++	if (IS_ERR(mtd))
++		mtd = open_mtd_device("data");
++
++	if (IS_ERR(mtd))
++		return;
++
++	/* get the first not bad block */
++	if (mtd_can_have_bb(mtd))
++		while (mtd_block_isbad(mtd, offset)) {
++			offset += mtd->erasesize;
++
++			if (offset > mtd->size) {
++				pr_err("UBI error: Failed to find a non-bad "
++				       "block on mtd%d\n", mtd->index);
++				goto cleanup;
++			}
++		}
++
++	/* check if the read from flash was successful */
++	err = mtd_read(mtd, offset, 4, &len, (void *) magic);
++	if ((err && !mtd_is_bitflip(err)) || len != 4) {
++		pr_err("UBI error: unable to read from mtd%d\n", mtd->index);
++		goto cleanup;
++	}
++
++	/* check for a valid ubi magic */
++	if (strncmp(magic, "UBI#", 4)) {
++		pr_err("UBI error: no valid UBI magic found inside mtd%d\n", mtd->index);
++		goto cleanup;
++	}
++
++	/* don't auto-add media types where UBI doesn't makes sense */
++	if (mtd->type != MTD_NANDFLASH &&
++	    mtd->type != MTD_NORFLASH &&
++	    mtd->type != MTD_DATAFLASH &&
++	    mtd->type != MTD_MLCNANDFLASH)
++		goto cleanup;
++
++	mutex_lock(&ubi_devices_mutex);
++	pr_notice("UBI: auto-attach mtd%d\n", mtd->index);
++	err = ubi_attach_mtd_dev(mtd, UBI_DEV_NUM_AUTO, 0, 0);
++	mutex_unlock(&ubi_devices_mutex);
++	if (err < 0) {
++		pr_err("UBI error: cannot attach mtd%d\n", mtd->index);
++		goto cleanup;
++	}
++
++	return;
++
++cleanup:
++	put_mtd_device(mtd);
++}
++
+ static int __init ubi_init(void)
+ {
+ 	int err, i, k;
+@@ -1251,6 +1318,12 @@ static int __init ubi_init(void)
+ 		}
+ 	}
+ 
++	/* auto-attach mtd devices only if built-in to the kernel and no ubi.mtd
++	 * parameter was given */
++	if (IS_ENABLED(CONFIG_MTD_ROOTFS_ROOT_DEV) &&
++	    !ubi_is_module() && !mtd_devs)
++		ubi_auto_attach();
++
+ 	err = ubiblock_init();
+ 	if (err) {
+ 		pr_err("UBI error: block: cannot initialize, error %d\n", err);
+diff --git a/drivers/mtd/ubi/debug.c b/drivers/mtd/ubi/debug.c
+index a1dff92ceedf..8a83072401a7 100644
+--- a/drivers/mtd/ubi/debug.c
++++ b/drivers/mtd/ubi/debug.c
+@@ -392,9 +392,6 @@ static void *eraseblk_count_seq_start(struct seq_file *s, loff_t *pos)
+ {
+ 	struct ubi_device *ubi = s->private;
+ 
+-	if (*pos == 0)
+-		return SEQ_START_TOKEN;
+-
+ 	if (*pos < ubi->peb_count)
+ 		return pos;
+ 
+@@ -408,8 +405,6 @@ static void *eraseblk_count_seq_next(struct seq_file *s, void *v, loff_t *pos)
+ {
+ 	struct ubi_device *ubi = s->private;
+ 
+-	if (v == SEQ_START_TOKEN)
+-		return pos;
+ 	(*pos)++;
+ 
+ 	if (*pos < ubi->peb_count)
+@@ -431,11 +426,8 @@ static int eraseblk_count_seq_show(struct seq_file *s, void *iter)
+ 	int err;
+ 
+ 	/* If this is the start, print a header */
+-	if (iter == SEQ_START_TOKEN) {
+-		seq_puts(s,
+-			 "physical_block_number\terase_count\tblock_status\tread_status\n");
+-		return 0;
+-	}
++	if (*block_number == 0)
++		seq_puts(s, "physical_block_number\terase_count\n");
+ 
+ 	err = ubi_io_is_bad(ubi, *block_number);
+ 	if (err)
+diff --git a/drivers/mtd/ubi/ubi.h b/drivers/mtd/ubi/ubi.h
+index 721b6aa7936c..1c751ab1a834 100644
+--- a/drivers/mtd/ubi/ubi.h
++++ b/drivers/mtd/ubi/ubi.h
+@@ -776,6 +776,7 @@ struct ubi_attach_info {
+ 	int mean_ec;
+ 	uint64_t ec_sum;
+ 	int ec_count;
++	bool eof_found;
+ 	struct kmem_cache *aeb_slab_cache;
+ 	struct ubi_ec_hdr *ech;
+ 	struct ubi_vid_io_buf *vidb;

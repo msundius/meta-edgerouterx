@@ -1,0 +1,76 @@
+--- a/arch/mips/include/asm/mach-ralink/mt7621.h
++++ b/arch/mips/include/asm/mach-ralink/mt7621.h
+@@ -17,6 +17,10 @@
+ #define SYSC_REG_CHIP_REV		0x0c
+ #define SYSC_REG_SYSTEM_CONFIG0		0x10
+ #define SYSC_REG_SYSTEM_CONFIG1		0x14
++#define SYSC_REG_CLKCFG0		0x2c
++#define SYSC_REG_CUR_CLK_STS		0x44
++
++#define MEMC_REG_CPU_PLL		0x648
+ 
+ #define CHIP_REV_PKG_MASK		0x1
+ #define CHIP_REV_PKG_SHIFT		16
+@@ -24,6 +28,22 @@
+ #define CHIP_REV_VER_SHIFT		8
+ #define CHIP_REV_ECO_MASK		0xf
+ 
++#define XTAL_MODE_SEL_MASK		0x7
++#define XTAL_MODE_SEL_SHIFT		6
++
++#define CPU_CLK_SEL_MASK		0x3
++#define CPU_CLK_SEL_SHIFT		30
++
++#define CUR_CPU_FDIV_MASK		0x1f
++#define CUR_CPU_FDIV_SHIFT		8
++#define CUR_CPU_FFRAC_MASK		0x1f
++#define CUR_CPU_FFRAC_SHIFT		0
++
++#define CPU_PLL_PREDIV_MASK		0x3
++#define CPU_PLL_PREDIV_SHIFT		12
++#define CPU_PLL_FBDIV_MASK		0x7f
++#define CPU_PLL_FBDIV_SHIFT		4
++
+ #define MT7621_DRAM_BASE                0x0
+ #define MT7621_DDR2_SIZE_MIN		32
+ #define MT7621_DDR2_SIZE_MAX		256
+--- a/arch/mips/ralink/timer-gic.c
++++ b/arch/mips/ralink/timer-gic.c
+@@ -9,14 +9,14 @@
+ 
+ #include <linux/of.h>
+ #include <linux/clk-provider.h>
+-#include <linux/clocksource.h>
++#include <asm/time.h>
+ 
+ #include "common.h"
+ 
+ void __init plat_time_init(void)
+ {
+ 	ralink_of_remap();
+-
++	ralink_clk_init();
+ 	of_clk_init(NULL);
+ 	timer_probe();
+ }
+--- /dev/null
++++ b/include/dt-bindings/clock/mt7621-clk.h
+@@ -0,0 +1,18 @@
++/*
++ * Copyright (C) 2018 Weijie Gao <hackpascal@gmail.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ */
++
++#ifndef __DT_BINDINGS_MT7621_CLK_H
++#define __DT_BINDINGS_MT7621_CLK_H
++
++#define MT7621_CLK_CPU		0
++#define MT7621_CLK_BUS		1
++
++#define MT7621_CLK_MAX		2
++
++#endif /* __DT_BINDINGS_MT7621_CLK_H */
